@@ -116,6 +116,11 @@
       z-index: 1;
       mask-image: radial-gradient(ellipse 85% 80% at 50% 45%, black 40%, transparent 75%);
       -webkit-mask-image: radial-gradient(ellipse 85% 80% at 50% 45%, black 40%, transparent 75%);
+      transition: opacity .5s ease, transform .5s ease;
+    }
+    .hero-showcase img.fade-out {
+      opacity: .3;
+      transform: scale(.98);
     }
     .hero-showcase::before {
       content: '';
@@ -403,7 +408,7 @@
 
 <!-- HERO IMAGE -->
 <div class="hero-showcase rv-scale">
-  <img src="photo/1.png" alt="Мини-приложение для записи в Telegram" />
+  <img src="photo/1.png" alt="Мини-приложение для записи в Telegram" id="heroImg" />
 </div>
 
 <!-- MARQUEE -->
@@ -615,10 +620,13 @@ document.addEventListener('mousemove', e => {
   document.querySelectorAll('.hero-orb-2').forEach(o => o.style.transform=`translate(${x*-25}px,${y*20}px)`);
 });
 
-// Typewriter
+// Typewriter + image crossfade
 (function(){
   const el=document.getElementById('tw');
+  const img=document.getElementById('heroImg');
   const words=['платят','бронируют','записываются'];
+  // When more photos are added, list them here:
+  const photos=['photo/1.png','photo/1.png','photo/1.png'];
   let wi=0, ci=0, del=false;
   function tick(){
     const w=words[wi];
@@ -630,7 +638,18 @@ document.addEventListener('mousemove', e => {
     } else {
       ci--;
       el.textContent=w.slice(0,ci);
-      if(ci===0){ del=false; wi=(wi+1)%words.length; setTimeout(tick,400); return; }
+      if(ci===0){
+        del=false;
+        wi=(wi+1)%words.length;
+        // Crossfade image
+        img.classList.add('fade-out');
+        setTimeout(()=>{
+          img.src=photos[wi];
+          img.classList.remove('fade-out');
+        },400);
+        setTimeout(tick,500);
+        return;
+      }
       setTimeout(tick,50);
     }
   }
