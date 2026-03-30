@@ -4,910 +4,328 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Егор Гуменюк — Разработка мини-приложений для Telegram, VK и MAX</title>
-  <meta name="description" content="Создаю мини-приложения для мессенджеров, которые автоматизируют бизнес и увеличивают продажи. Онлайн-запись, CRM, оплата — всё внутри Telegram." />
+  <meta name="description" content="Создаю мини-приложения для мессенджеров, которые автоматизируют бизнес и увеличивают продажи." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Onest:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
     :root {
-      --bg: #06060b;
-      --bg-card: #0d0d14;
-      --bg-card-hover: #12121c;
-      --border: rgba(255,255,255,0.06);
-      --border-hover: rgba(255,255,255,0.12);
-      --text: #c8cfd8;
-      --text-muted: #6b7280;
-      --text-heading: #f0f2f5;
-      --accent: #818cf8;
-      --accent-bright: #a78bfa;
-      --accent-cyan: #22d3ee;
-      --gradient: linear-gradient(135deg, #667eea 0%, #818cf8 40%, #a78bfa 100%);
-      --gradient-text: linear-gradient(135deg, #818cf8, #22d3ee);
-      --glow: 0 0 80px rgba(129,140,248,0.15);
+      --bg: #000;
+      --bg-card: #0a0a0a;
+      --bg-card-hover: #111;
+      --border: rgba(255,255,255,0.08);
+      --border-hover: rgba(255,255,255,0.15);
+      --text: #999;
+      --text-heading: #fff;
+      --yellow: #facc15;
+      --yellow-dim: rgba(250,204,21,0.1);
+      --yellow-glow: rgba(250,204,21,0.15);
       --radius: 1.25rem;
-      --radius-sm: 0.75rem;
-      --font-heading: 'Space Grotesk', sans-serif;
-      --font-body: 'Onest', sans-serif;
+      --font-h: 'Space Grotesk', sans-serif;
+      --font-b: 'Onest', sans-serif;
     }
-
     html { scroll-behavior: smooth; }
-
-    body {
-      font-family: var(--font-body);
-      line-height: 1.65;
-      color: var(--text);
-      background: var(--bg);
-      overflow-x: hidden;
-      -webkit-font-smoothing: antialiased;
-    }
-
+    body { font-family: var(--font-b); line-height: 1.65; color: var(--text); background: var(--bg); overflow-x: hidden; -webkit-font-smoothing: antialiased; }
     .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+    h1,h2,h3,h4,h5 { font-family: var(--font-h); color: var(--text-heading); line-height: 1.15; letter-spacing: -0.03em; }
+    a { color: var(--yellow); text-decoration: none; transition: color .3s; }
+    a:hover { color: #fde68a; }
 
-    h1, h2, h3, h4, h5 {
-      font-family: var(--font-heading);
-      color: var(--text-heading);
-      line-height: 1.2;
-      letter-spacing: -0.02em;
-    }
-
-    a { color: var(--accent); text-decoration: none; transition: color 0.3s; }
-    a:hover { color: var(--accent-bright); }
-
-    /* ===== LUCIDE ICON BASE ===== */
-    .icon {
-      width: 28px;
-      height: 28px;
-      stroke: var(--accent);
-      stroke-width: 1.75;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-      fill: none;
-      flex-shrink: 0;
-    }
-    .icon-lg { width: 32px; height: 32px; }
-    .icon-sm { width: 18px; height: 18px; }
-
-    /* ===== REVEAL ANIMATIONS ===== */
-    .reveal {
-      opacity: 0;
-      transform: translateY(40px);
-      transition: opacity 0.9s cubic-bezier(0.22, 1, 0.36, 1), transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
-    }
-    .reveal.visible { opacity: 1; transform: translateY(0); }
-    .reveal-d1 { transition-delay: 0.1s; }
-    .reveal-d2 { transition-delay: 0.2s; }
-    .reveal-d3 { transition-delay: 0.3s; }
-    .reveal-d4 { transition-delay: 0.4s; }
-    .reveal-d5 { transition-delay: 0.5s; }
-
-    /* Scale-in variant */
-    .reveal-scale {
-      opacity: 0;
-      transform: scale(0.92) translateY(20px);
-      transition: opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1), transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
-    }
-    .reveal-scale.visible { opacity: 1; transform: scale(1) translateY(0); }
-
-    /* Blur-in variant */
-    .reveal-blur {
-      opacity: 0;
-      filter: blur(12px);
-      transform: translateY(20px);
-      transition: opacity 0.9s cubic-bezier(0.22, 1, 0.36, 1), filter 0.9s cubic-bezier(0.22, 1, 0.36, 1), transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
-    }
-    .reveal-blur.visible { opacity: 1; filter: blur(0); transform: translateY(0); }
-
-    /* ===== ANIMATED ORB BACKGROUND ===== */
-    .orb-canvas {
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      overflow: hidden;
-      pointer-events: none;
-      z-index: 0;
-    }
-    .orb {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(100px);
-      opacity: 0.4;
-      animation: orbFloat 20s ease-in-out infinite;
-    }
-    .orb-1 {
-      width: 600px; height: 600px;
-      background: radial-gradient(circle, rgba(129,140,248,0.3), transparent 70%);
-      top: -20%; left: 20%;
-      animation-delay: 0s;
-    }
-    .orb-2 {
-      width: 500px; height: 500px;
-      background: radial-gradient(circle, rgba(34,211,238,0.2), transparent 70%);
-      top: 10%; right: -10%;
-      animation-delay: -7s;
-      animation-duration: 25s;
-    }
-    .orb-3 {
-      width: 400px; height: 400px;
-      background: radial-gradient(circle, rgba(167,139,250,0.25), transparent 70%);
-      bottom: -10%; left: 40%;
-      animation-delay: -14s;
-      animation-duration: 22s;
-    }
-    @keyframes orbFloat {
-      0%, 100% { transform: translate(0, 0) scale(1); }
-      25% { transform: translate(60px, -40px) scale(1.1); }
-      50% { transform: translate(-30px, 50px) scale(0.95); }
-      75% { transform: translate(40px, 20px) scale(1.05); }
-    }
-
-    /* ===== DOT GRID ===== */
-    .dot-grid {
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background-image: radial-gradient(rgba(255,255,255,0.04) 1px, transparent 1px);
-      background-size: 40px 40px;
-      pointer-events: none;
-      z-index: 0;
-      mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black 30%, transparent 100%);
-      -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black 30%, transparent 100%);
-    }
-
-    /* ===== MOUSE GLOW ===== */
-    .glow-card {
-      position: relative;
-      overflow: hidden;
-    }
-    .glow-card::after {
+    /* === GRAIN OVERLAY === */
+    body::after {
       content: '';
-      position: absolute;
-      width: 300px;
-      height: 300px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(129,140,248,0.08), transparent 70%);
-      pointer-events: none;
-      transform: translate(-50%, -50%);
-      opacity: 0;
-      transition: opacity 0.4s;
-      left: var(--mouse-x, 50%);
-      top: var(--mouse-y, 50%);
-    }
-    .glow-card:hover::after { opacity: 1; }
-
-    /* ===== GRADIENT BORDER ANIMATION ===== */
-    .gradient-border {
-      position: relative;
-    }
-    .gradient-border::before {
-      content: '';
-      position: absolute;
+      position: fixed;
       inset: 0;
-      border-radius: inherit;
-      padding: 1px;
-      background: conic-gradient(from var(--border-angle, 0deg), transparent 40%, var(--accent) 50%, transparent 60%);
-      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      -webkit-mask-composite: xor;
-      mask-composite: exclude;
-      opacity: 0;
-      transition: opacity 0.5s;
-    }
-    .gradient-border:hover::before {
-      opacity: 1;
-      animation: rotateBorder 3s linear infinite;
-    }
-    @keyframes rotateBorder {
-      to { --border-angle: 360deg; }
-    }
-    @property --border-angle {
-      syntax: '<angle>';
-      initial-value: 0deg;
-      inherits: false;
+      z-index: 9999;
+      pointer-events: none;
+      opacity: 0.03;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-repeat: repeat;
+      background-size: 256px;
     }
 
-    /* ===== MAGNETIC BUTTON ===== */
-    .btn-magnetic {
-      transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s;
-    }
+    /* === ICON === */
+    .icon { width: 28px; height: 28px; stroke: var(--yellow); stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; fill: none; flex-shrink: 0; }
 
-    /* ===== NAV ===== */
-    .nav {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      z-index: 100;
-      padding: 0 24px;
-      transition: background 0.4s, backdrop-filter 0.4s, border-color 0.4s;
-      border-bottom: 1px solid transparent;
-    }
-    .nav.scrolled {
-      background: rgba(6,6,11,0.85);
-      backdrop-filter: blur(20px) saturate(180%);
-      -webkit-backdrop-filter: blur(20px) saturate(180%);
-      border-bottom-color: var(--border);
-    }
-    .nav-inner {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      height: 72px;
-    }
-    .nav-logo {
-      font-family: var(--font-heading);
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: var(--text-heading);
-    }
-    .nav-logo span { color: var(--accent); }
+    /* === REVEALS === */
+    .rv { opacity: 0; transform: translateY(50px); transition: opacity 1s cubic-bezier(.16,1,.3,1), transform 1s cubic-bezier(.16,1,.3,1); }
+    .rv.v { opacity: 1; transform: translateY(0); }
+    .rv-blur { opacity: 0; filter: blur(16px); transform: translateY(24px) scale(.97); transition: opacity 1s cubic-bezier(.16,1,.3,1), filter 1s cubic-bezier(.16,1,.3,1), transform 1s cubic-bezier(.16,1,.3,1); }
+    .rv-blur.v { opacity: 1; filter: blur(0); transform: translateY(0) scale(1); }
+    .rv-scale { opacity: 0; transform: scale(.88) translateY(30px); transition: opacity .8s cubic-bezier(.16,1,.3,1), transform .8s cubic-bezier(.16,1,.3,1); }
+    .rv-scale.v { opacity: 1; transform: scale(1) translateY(0); }
+    .rv-left { opacity: 0; transform: translateX(-60px); transition: opacity .9s cubic-bezier(.16,1,.3,1), transform .9s cubic-bezier(.16,1,.3,1); }
+    .rv-left.v { opacity: 1; transform: translateX(0); }
+    .rv-right { opacity: 0; transform: translateX(60px); transition: opacity .9s cubic-bezier(.16,1,.3,1), transform .9s cubic-bezier(.16,1,.3,1); }
+    .rv-right.v { opacity: 1; transform: translateX(0); }
+    .d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}.d4{transition-delay:.4s}.d5{transition-delay:.5s}
+
+    /* === MARQUEE === */
+    .marquee-wrap { overflow: hidden; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 20px 0; }
+    .marquee-track { display: flex; gap: 60px; animation: marquee 30s linear infinite; width: max-content; }
+    .marquee-track span { font-family: var(--font-h); font-size: 1rem; font-weight: 600; color: rgba(255,255,255,.12); text-transform: uppercase; letter-spacing: .15em; white-space: nowrap; }
+    .marquee-track span b { color: var(--yellow); font-weight: 600; }
+    @keyframes marquee { to { transform: translateX(-50%); } }
+
+    /* === NAV === */
+    .nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; padding: 0 24px; transition: background .4s, border-color .4s; border-bottom: 1px solid transparent; }
+    .nav.scrolled { background: rgba(0,0,0,.85); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); border-bottom-color: var(--border); }
+    .nav-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 72px; }
+    .nav-logo { font-family: var(--font-h); font-size: 1.25rem; font-weight: 700; color: #fff; }
+    .nav-logo span { color: var(--yellow); }
     .nav-links { display: flex; gap: 32px; list-style: none; }
-    .nav-links a {
-      color: var(--text-muted);
-      font-size: 0.9rem;
-      font-weight: 500;
-      transition: color 0.3s;
-      position: relative;
-    }
-    .nav-links a::after {
-      content: '';
-      position: absolute;
-      bottom: -4px;
-      left: 0;
-      width: 0;
-      height: 2px;
-      background: var(--accent);
-      border-radius: 2px;
-      transition: width 0.3s cubic-bezier(0.22, 1, 0.36, 1);
-    }
-    .nav-links a:hover { color: var(--text-heading); }
+    .nav-links a { color: #666; font-size: .9rem; font-weight: 500; transition: color .3s; position: relative; }
+    .nav-links a::after { content:''; position: absolute; bottom: -4px; left: 0; width: 0; height: 2px; background: var(--yellow); border-radius: 2px; transition: width .3s cubic-bezier(.16,1,.3,1); }
+    .nav-links a:hover { color: #fff; }
     .nav-links a:hover::after { width: 100%; }
-    .nav-cta {
-      background: var(--gradient);
-      color: white;
-      border: none;
-      padding: 10px 24px;
-      border-radius: 10px;
-      font-family: var(--font-body);
-      font-size: 0.9rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: transform 0.3s, box-shadow 0.3s;
-    }
-    .nav-cta:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 8px 32px rgba(129,140,248,0.3);
-      color: white;
-    }
-    .nav-burger {
-      display: none;
-      flex-direction: column;
-      gap: 5px;
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 8px;
-    }
-    .nav-burger span {
-      display: block;
-      width: 24px;
-      height: 2px;
-      background: var(--text-heading);
-      border-radius: 2px;
-      transition: transform 0.3s, opacity 0.3s;
-    }
-    .nav-burger.active span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
-    .nav-burger.active span:nth-child(2) { opacity: 0; }
-    .nav-burger.active span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+    .nav-cta { background: var(--yellow); color: #000; border: none; padding: 10px 24px; border-radius: 10px; font-family: var(--font-b); font-size: .9rem; font-weight: 700; cursor: pointer; transition: transform .3s, box-shadow .3s; }
+    .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 8px 32px var(--yellow-glow); color: #000; }
+    .burger { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; padding: 8px; }
+    .burger span { display: block; width: 24px; height: 2px; background: #fff; border-radius: 2px; transition: transform .3s, opacity .3s; }
+    .burger.on span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}.burger.on span:nth-child(2){opacity:0}.burger.on span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px)}
+    .mob-menu { display: none; position: fixed; top: 72px; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,.97); backdrop-filter: blur(20px); z-index: 99; padding: 40px 24px; }
+    .mob-menu.open { display: flex; flex-direction: column; gap: 24px; align-items: center; }
+    .mob-menu a { color: #fff; font-size: 1.25rem; font-weight: 500; }
 
-    .mobile-menu {
-      display: none;
-      position: fixed;
-      top: 72px; left: 0; right: 0; bottom: 0;
-      background: rgba(6,6,11,0.97);
-      backdrop-filter: blur(20px);
-      z-index: 99;
-      padding: 40px 24px;
-    }
-    .mobile-menu.open { display: flex; flex-direction: column; gap: 24px; align-items: center; }
-    .mobile-menu a { color: var(--text-heading); font-size: 1.25rem; font-weight: 500; }
-
-    /* ===== HERO ===== */
-    .hero {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      position: relative;
-      padding: 120px 0 100px;
-      overflow: hidden;
-    }
-    .hero::after {
-      content: '';
-      position: absolute;
-      bottom: 0; left: 0; right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--border), transparent);
-    }
+    /* === HERO === */
+    .hero { min-height: 100vh; display: flex; align-items: center; position: relative; padding: 120px 0 100px; overflow: hidden; }
+    .hero-bg { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
+    .hero-orb { position: absolute; border-radius: 50%; filter: blur(120px); }
+    .hero-orb-1 { width: 700px; height: 700px; background: rgba(250,204,21,.07); top: -30%; left: 10%; animation: orbF 20s ease-in-out infinite; }
+    .hero-orb-2 { width: 500px; height: 500px; background: rgba(255,255,255,.03); bottom: -20%; right: 5%; animation: orbF 25s ease-in-out infinite reverse; }
+    @keyframes orbF { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(50px,-40px) scale(1.1)} 66%{transform:translate(-30px,60px) scale(.9)} }
+    .hero-grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px); background-size: 60px 60px; mask-image: radial-gradient(ellipse 60% 50% at 50% 40%, black 20%, transparent 80%); -webkit-mask-image: radial-gradient(ellipse 60% 50% at 50% 40%, black 20%, transparent 80%); }
+    .hero::after { content:''; position: absolute; bottom: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, var(--border), transparent); }
     .hero-content { position: relative; z-index: 1; text-align: center; max-width: 900px; margin: 0 auto; }
-    .hero-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(129,140,248,0.08);
-      border: 1px solid rgba(129,140,248,0.15);
-      padding: 8px 20px;
-      border-radius: 100px;
-      font-size: 0.85rem;
-      color: var(--accent);
-      font-weight: 500;
-      margin-bottom: 32px;
-    }
-    .hero-badge::before {
-      content: '';
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: #10b981;
-      box-shadow: 0 0 8px rgba(16,185,129,0.5);
-      animation: pulse 2s infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.5; transform: scale(0.8); }
-    }
-    .hero h1 {
-      font-size: clamp(2.5rem, 6vw, 4.5rem);
-      font-weight: 700;
-      margin-bottom: 24px;
-      line-height: 1.1;
-    }
-    .hero h1 .gradient-text {
-      background: var(--gradient-text);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    /* Hero text line-by-line reveal */
-    .hero-line {
-      display: block;
-      opacity: 0;
-      transform: translateY(30px);
-      animation: lineReveal 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-    }
-    .hero-line:nth-child(1) { animation-delay: 0.2s; }
-    .hero-line:nth-child(2) { animation-delay: 0.4s; }
-    @keyframes lineReveal {
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .hero-sub {
-      font-size: clamp(1.05rem, 2vw, 1.25rem);
-      color: var(--text-muted);
-      max-width: 640px;
-      margin: 0 auto 48px;
-      line-height: 1.7;
-      opacity: 0;
-      animation: lineReveal 0.8s 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-    }
-    .hero-buttons {
-      display: flex;
-      justify-content: center;
-      gap: 16px;
-      flex-wrap: wrap;
-      margin-bottom: 64px;
-      opacity: 0;
-      animation: lineReveal 0.8s 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-    }
-    .btn-primary {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--gradient);
-      color: white;
-      border: none;
-      padding: 16px 36px;
-      border-radius: 14px;
-      font-family: var(--font-body);
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s;
-      text-decoration: none;
-      position: relative;
-      overflow: hidden;
-    }
-    .btn-primary::before {
-      content: '';
-      position: absolute;
-      top: 0; left: -100%;
-      width: 100%; height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
-      transition: left 0.6s;
-    }
-    .btn-primary:hover::before { left: 100%; }
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 40px rgba(129,140,248,0.4);
-      color: white;
-    }
-    .btn-secondary {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(255,255,255,0.04);
-      color: var(--text-heading);
-      border: 1px solid var(--border);
-      padding: 16px 36px;
-      border-radius: 14px;
-      font-family: var(--font-body);
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s;
-      text-decoration: none;
-    }
-    .btn-secondary:hover {
-      background: rgba(255,255,255,0.08);
-      border-color: var(--border-hover);
-      color: var(--text-heading);
-    }
-    .hero-stats {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 1px;
-      background: var(--border);
-      border-radius: var(--radius);
-      overflow: hidden;
-      border: 1px solid var(--border);
-      opacity: 0;
-      animation: lineReveal 0.8s 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-    }
-    .hero-stat {
-      background: var(--bg);
-      padding: 32px 20px;
-      text-align: center;
-    }
-    .hero-stat-number {
-      display: block;
-      font-family: var(--font-heading);
-      font-size: 2rem;
-      font-weight: 700;
-      color: var(--text-heading);
-      margin-bottom: 6px;
-    }
-    .hero-stat-label { font-size: 0.85rem; color: var(--text-muted); }
+    .hero-badge { display: inline-flex; align-items: center; gap: 8px; background: var(--yellow-dim); border: 1px solid rgba(250,204,21,.2); padding: 8px 20px; border-radius: 100px; font-size: .85rem; color: var(--yellow); font-weight: 600; margin-bottom: 32px; opacity: 0; animation: fadeUp .8s .1s cubic-bezier(.16,1,.3,1) forwards; }
+    .hero-badge::before { content:''; width: 8px; height: 8px; border-radius: 50%; background: var(--yellow); box-shadow: 0 0 12px var(--yellow); animation: blink 2s infinite; }
+    @keyframes blink { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.3;transform:scale(.7)} }
+    @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } from { opacity: 0; transform: translateY(30px); } }
+    .hero h1 { font-size: clamp(2.8rem, 6.5vw, 5rem); font-weight: 700; margin-bottom: 24px; line-height: 1.05; }
+    .hl { display: block; opacity: 0; transform: translateY(40px) rotate(1deg); animation: heroLine .9s cubic-bezier(.16,1,.3,1) forwards; }
+    .hl:nth-child(1){animation-delay:.2s}.hl:nth-child(2){animation-delay:.45s}
+    @keyframes heroLine { to { opacity: 1; transform: translateY(0) rotate(0); } }
+    .hl-y { color: var(--yellow); display: inline; }
+    .hero-sub { font-size: clamp(1.05rem,2vw,1.25rem); color: #666; max-width: 620px; margin: 0 auto 48px; line-height: 1.7; opacity: 0; animation: fadeUp .8s .7s cubic-bezier(.16,1,.3,1) forwards; }
+    .hero-btns { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; margin-bottom: 64px; opacity: 0; animation: fadeUp .8s .9s cubic-bezier(.16,1,.3,1) forwards; }
+    .btn-p { display: inline-flex; align-items: center; gap: 8px; background: var(--yellow); color: #000; border: none; padding: 16px 36px; border-radius: 14px; font-family: var(--font-b); font-size: 1rem; font-weight: 700; cursor: pointer; transition: transform .3s, box-shadow .3s; text-decoration: none; position: relative; overflow: hidden; }
+    .btn-p::before { content:''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent); transition: left .5s; }
+    .btn-p:hover::before { left: 100%; }
+    .btn-p:hover { transform: translateY(-3px); box-shadow: 0 16px 48px rgba(250,204,21,.25); color: #000; }
+    .btn-p svg { transition: transform .3s; }
+    .btn-p:hover svg { transform: translateX(4px); }
+    .btn-s { display: inline-flex; align-items: center; gap: 8px; background: transparent; color: #fff; border: 1px solid var(--border); padding: 16px 36px; border-radius: 14px; font-family: var(--font-b); font-size: 1rem; font-weight: 600; cursor: pointer; transition: all .3s; text-decoration: none; }
+    .btn-s:hover { background: rgba(255,255,255,.05); border-color: var(--border-hover); color: #fff; }
+    .hero-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 1px; background: var(--border); border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); opacity: 0; animation: fadeUp .8s 1.1s cubic-bezier(.16,1,.3,1) forwards; }
+    .hero-stat { background: var(--bg); padding: 32px 20px; text-align: center; }
+    .hero-stat-n { display: block; font-family: var(--font-h); font-size: 2rem; font-weight: 700; color: #fff; margin-bottom: 6px; }
+    .hero-stat-l { font-size: .85rem; color: #555; }
 
-    /* ===== SECTION COMMON ===== */
+    /* === SECTIONS === */
     section { padding: 120px 0; position: relative; }
-    section::after {
-      content: '';
-      position: absolute;
-      bottom: 0; left: 0; right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--border), transparent);
-    }
-    .section-label {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: var(--accent);
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      margin-bottom: 16px;
-    }
-    .section-label::before {
-      content: '';
-      width: 20px; height: 2px;
-      background: var(--accent);
-      border-radius: 2px;
-    }
-    .section-title { font-size: clamp(2rem, 4vw, 3rem); margin-bottom: 16px; }
-    .section-desc { font-size: 1.1rem; color: var(--text-muted); max-width: 600px; line-height: 1.7; }
-    .section-header { margin-bottom: 64px; }
-    .section-header-center { text-align: center; }
-    .section-header-center .section-desc { margin: 0 auto; }
+    section::after { content:''; position: absolute; bottom: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, var(--border), transparent); }
+    .stag { display: inline-flex; align-items: center; gap: 8px; font-size: .75rem; font-weight: 700; color: var(--yellow); text-transform: uppercase; letter-spacing: .15em; margin-bottom: 16px; }
+    .stag::before { content:''; width: 24px; height: 2px; background: var(--yellow); border-radius: 2px; }
+    .stitle { font-size: clamp(2rem,4vw,3.2rem); margin-bottom: 16px; }
+    .sdesc { font-size: 1.1rem; color: #666; max-width: 580px; line-height: 1.7; }
+    .sh { margin-bottom: 64px; }
+    .shc { text-align: center; }
+    .shc .sdesc { margin: 0 auto; }
 
-    /* ===== CARD ICON BOX ===== */
-    .card-icon {
-      width: 56px; height: 56px;
-      border-radius: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 20px;
-      transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s;
-    }
-    .card-icon-red {
-      background: rgba(239,68,68,0.08);
-      border: 1px solid rgba(239,68,68,0.12);
-    }
-    .card-icon-red .icon { stroke: #f87171; }
-    .card-icon-accent {
-      background: rgba(129,140,248,0.08);
-      border: 1px solid rgba(129,140,248,0.12);
-    }
-    .card-icon-accent .icon { stroke: var(--accent); }
+    /* === CARD ICON === */
+    .ci { width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; transition: transform .5s cubic-bezier(.16,1,.3,1), box-shadow .5s; }
+    .ci-y { background: var(--yellow-dim); border: 1px solid rgba(250,204,21,.15); }
+    .ci-y .icon { stroke: var(--yellow); }
+    .ci-r { background: rgba(255,255,255,.04); border: 1px solid var(--border); }
+    .ci-r .icon { stroke: #666; }
 
-    /* ===== PROBLEMS ===== */
-    .problems-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 20px;
-    }
-    .problem-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 36px 28px;
-      transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-      position: relative;
-      overflow: hidden;
-    }
-    .problem-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, #ef4444, transparent);
-      opacity: 0;
-      transition: opacity 0.4s;
-    }
-    .problem-card:hover {
-      border-color: rgba(239,68,68,0.15);
-      transform: translateY(-6px);
-      box-shadow: 0 20px 60px rgba(239,68,68,0.06);
-    }
-    .problem-card:hover::before { opacity: 1; }
-    .problem-card:hover .card-icon { transform: scale(1.1); box-shadow: 0 0 30px rgba(239,68,68,0.12); }
-    .problem-card h3 { font-size: 1.15rem; margin-bottom: 10px; font-weight: 600; }
-    .problem-card p { font-size: 0.95rem; color: var(--text-muted); line-height: 1.7; }
+    /* === PROBLEMS === */
+    .pgrid { display: grid; grid-template-columns: repeat(auto-fit,minmax(270px,1fr)); gap: 20px; }
+    .pcard { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 36px 28px; transition: all .5s cubic-bezier(.16,1,.3,1); position: relative; overflow: hidden; }
+    .pcard::before { content:''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, rgba(255,255,255,.2), transparent); opacity: 0; transition: opacity .4s; }
+    .pcard:hover { border-color: var(--border-hover); transform: translateY(-8px); }
+    .pcard:hover::before { opacity: 1; }
+    .pcard:hover .ci { transform: scale(1.15) rotate(-5deg); box-shadow: 0 0 30px var(--yellow-glow); }
+    .pcard:hover .ci-r { background: var(--yellow-dim); border-color: rgba(250,204,21,.15); }
+    .pcard:hover .ci-r .icon { stroke: var(--yellow); }
+    .pcard h3 { font-size: 1.15rem; margin-bottom: 10px; font-weight: 600; }
+    .pcard p { font-size: .95rem; color: #666; line-height: 1.7; }
 
-    /* ===== SOLUTION ===== */
-    .solution-section { background: linear-gradient(180deg, var(--bg) 0%, #0a0a14 100%); }
-    .solution-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
-    .solution-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 40px 28px;
-      text-align: center;
-      transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-      position: relative;
-      overflow: hidden;
-    }
-    .solution-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 2px;
-      background: var(--gradient);
-      opacity: 0;
-      transition: opacity 0.4s;
-    }
-    .solution-card:hover { border-color: rgba(129,140,248,0.2); transform: translateY(-6px); box-shadow: 0 20px 60px rgba(129,140,248,0.06); }
-    .solution-card:hover::before { opacity: 1; }
-    .solution-card:hover .card-icon { transform: scale(1.1); box-shadow: 0 0 30px rgba(129,140,248,0.15); }
-    .solution-card .card-icon { margin: 0 auto 20px; }
-    .solution-card h3 { font-size: 1.15rem; margin-bottom: 12px; }
-    .solution-card p { font-size: 0.9rem; color: var(--text-muted); line-height: 1.7; }
+    /* === SOLUTION === */
+    .sgrid { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; }
+    .scard { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 40px 28px; text-align: center; transition: all .5s cubic-bezier(.16,1,.3,1); position: relative; overflow: hidden; }
+    .scard::before { content:''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--yellow); transform: scaleX(0); transition: transform .5s cubic-bezier(.16,1,.3,1); }
+    .scard:hover { border-color: rgba(250,204,21,.15); transform: translateY(-8px); }
+    .scard:hover::before { transform: scaleX(1); }
+    .scard:hover .ci { transform: scale(1.15); box-shadow: 0 0 40px var(--yellow-glow); }
+    .scard .ci { margin: 0 auto 20px; }
+    .scard h3 { font-size: 1.15rem; margin-bottom: 12px; }
+    .scard p { font-size: .9rem; color: #666; line-height: 1.7; }
 
-    /* ===== SERVICES ===== */
-    .services-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
-    .service-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 40px 32px;
-      transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-      display: flex;
-      gap: 24px;
-      position: relative;
-      overflow: hidden;
-    }
-    .service-card:hover {
-      border-color: var(--border-hover);
-      transform: translateY(-6px);
-      box-shadow: var(--glow);
-    }
-    .service-card:hover .card-icon { transform: scale(1.1); }
-    .service-card .card-icon { flex-shrink: 0; margin-bottom: 0; }
-    .service-card h3 { font-size: 1.2rem; margin-bottom: 10px; }
-    .service-card p { font-size: 0.9rem; color: var(--text-muted); line-height: 1.7; margin-bottom: 16px; }
-    .service-tags { display: flex; flex-wrap: wrap; gap: 8px; }
-    .service-tag {
-      background: rgba(129,140,248,0.08);
-      border: 1px solid rgba(129,140,248,0.12);
-      color: var(--accent);
-      padding: 4px 12px;
-      border-radius: 8px;
-      font-size: 0.75rem;
-      font-weight: 500;
-    }
+    /* === SERVICES === */
+    .svgrid { display: grid; grid-template-columns: repeat(2,1fr); gap: 24px; }
+    .svcard { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 40px 32px; transition: all .5s cubic-bezier(.16,1,.3,1); display: flex; gap: 24px; position: relative; overflow: hidden; }
+    .svcard:hover { border-color: var(--border-hover); transform: translateY(-8px); box-shadow: 0 30px 80px rgba(250,204,21,.04); }
+    .svcard:hover .ci { transform: scale(1.15) rotate(-5deg); }
+    .svcard .ci { flex-shrink: 0; margin-bottom: 0; }
+    .svcard h3 { font-size: 1.15rem; margin-bottom: 10px; }
+    .svcard p { font-size: .9rem; color: #666; line-height: 1.7; margin-bottom: 16px; }
+    .tags { display: flex; flex-wrap: wrap; gap: 8px; }
+    .tag { background: var(--yellow-dim); border: 1px solid rgba(250,204,21,.12); color: var(--yellow); padding: 4px 12px; border-radius: 8px; font-size: .75rem; font-weight: 600; }
 
-    /* ===== PLATFORMS ===== */
-    .platforms-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
-    .platform-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 48px 32px;
-      text-align: center;
-      transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-      position: relative;
-      overflow: hidden;
-    }
-    .platform-card:hover { border-color: var(--border-hover); transform: translateY(-6px); }
-    .platform-logo {
-      width: 72px; height: 72px;
-      border-radius: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 20px;
-      transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.5s;
-    }
-    .platform-card:hover .platform-logo { transform: scale(1.1) rotate(-3deg); }
-    .platform-tg { background: linear-gradient(135deg, #2AABEE, #229ED9); box-shadow: 0 8px 24px rgba(42,171,238,0.2); }
-    .platform-vk { background: linear-gradient(135deg, #0077FF, #0066DD); box-shadow: 0 8px 24px rgba(0,119,255,0.2); }
-    .platform-max { background: linear-gradient(135deg, #FF6B35, #FF4444); box-shadow: 0 8px 24px rgba(255,107,53,0.2); }
-    .platform-card:hover .platform-tg { box-shadow: 0 12px 40px rgba(42,171,238,0.3); }
-    .platform-card:hover .platform-vk { box-shadow: 0 12px 40px rgba(0,119,255,0.3); }
-    .platform-card:hover .platform-max { box-shadow: 0 12px 40px rgba(255,107,53,0.3); }
-    .platform-logo .icon { stroke: white; width: 32px; height: 32px; }
-    .platform-card h3 { font-size: 1.2rem; margin-bottom: 10px; }
-    .platform-card p { font-size: 0.9rem; color: var(--text-muted); line-height: 1.65; }
+    /* === PLATFORMS === */
+    .plrow { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; }
+    .plcard { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 48px 32px; text-align: center; transition: all .5s cubic-bezier(.16,1,.3,1); position: relative; overflow: hidden; }
+    .plcard:hover { border-color: var(--border-hover); transform: translateY(-8px); }
+    .pl-logo { width: 72px; height: 72px; border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; transition: transform .6s cubic-bezier(.16,1,.3,1), box-shadow .6s; }
+    .plcard:hover .pl-logo { transform: scale(1.15) rotate(-5deg); }
+    .pl-logo img { width: 38px; height: 38px; object-fit: contain; }
+    .pl-tg { background: linear-gradient(135deg,#2AABEE,#229ED9); box-shadow: 0 8px 24px rgba(42,171,238,.2); }
+    .plcard:hover .pl-tg { box-shadow: 0 16px 48px rgba(42,171,238,.35); }
+    .pl-vk { background: linear-gradient(135deg,#0077FF,#0066DD); box-shadow: 0 8px 24px rgba(0,119,255,.2); }
+    .plcard:hover .pl-vk { box-shadow: 0 16px 48px rgba(0,119,255,.35); }
+    .pl-max { background: linear-gradient(135deg,#168ACD,#0B6FB5); box-shadow: 0 8px 24px rgba(22,138,205,.2); }
+    .plcard:hover .pl-max { box-shadow: 0 16px 48px rgba(22,138,205,.35); }
+    .plcard h3 { font-size: 1.2rem; margin-bottom: 10px; }
+    .plcard p { font-size: .9rem; color: #666; line-height: 1.65; }
 
-    /* ===== PROCESS ===== */
-    .process-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
-    .process-step {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 36px 24px;
-      text-align: center;
-      position: relative;
-      transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-    }
-    .process-step:hover { border-color: var(--border-hover); transform: translateY(-6px); }
-    .step-number {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 48px; height: 48px;
-      border-radius: 14px;
-      background: var(--gradient);
-      color: white;
-      font-family: var(--font-heading);
-      font-size: 1.25rem;
-      font-weight: 700;
-      margin: 0 auto 20px;
-      transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s;
-    }
-    .process-step:hover .step-number { transform: scale(1.15) rotate(-5deg); box-shadow: 0 8px 30px rgba(129,140,248,0.3); }
-    .process-step h3 { font-size: 1.05rem; margin-bottom: 10px; }
-    .process-step p { font-size: 0.85rem; color: var(--text-muted); line-height: 1.65; }
+    /* === PROCESS === */
+    .prgrid { display: grid; grid-template-columns: repeat(4,1fr); gap: 24px; }
+    .prstep { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 36px 24px; text-align: center; position: relative; transition: all .5s cubic-bezier(.16,1,.3,1); }
+    .prstep:hover { border-color: var(--border-hover); transform: translateY(-8px); }
+    .sn { display: flex; align-items: center; justify-content: center; width: 52px; height: 52px; border-radius: 16px; background: var(--yellow); color: #000; font-family: var(--font-h); font-size: 1.35rem; font-weight: 700; margin: 0 auto 20px; transition: transform .5s cubic-bezier(.16,1,.3,1), box-shadow .5s; }
+    .prstep:hover .sn { transform: scale(1.2) rotate(-8deg); box-shadow: 0 12px 40px rgba(250,204,21,.3); }
+    .prstep h3 { font-size: 1.05rem; margin-bottom: 10px; }
+    .prstep p { font-size: .85rem; color: #555; line-height: 1.65; }
 
-    /* ===== CASES ===== */
-    .cases-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 24px; }
-    .case-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      overflow: hidden;
-      transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-    }
-    .case-card:hover { border-color: var(--border-hover); transform: translateY(-6px); box-shadow: var(--glow); }
-    .case-image { height: 200px; background-size: cover; background-position: center; position: relative; transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
-    .case-card:hover .case-image { transform: scale(1.05); }
-    .case-image::after {
-      content: '';
-      position: absolute;
-      bottom: 0; left: 0; right: 0;
-      height: 80px;
-      background: linear-gradient(transparent, var(--bg-card));
-    }
-    .case-body { padding: 28px; position: relative; }
-    .case-type { display: inline-block; font-size: 0.75rem; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; }
-    .case-card h3 { font-size: 1.15rem; margin-bottom: 12px; }
-    .case-card p { font-size: 0.9rem; color: var(--text-muted); line-height: 1.65; margin-bottom: 20px; }
-    .case-metrics { display: flex; gap: 24px; }
-    .case-metric-value { font-family: var(--font-heading); font-size: 1.5rem; font-weight: 700; color: #10b981; display: block; }
-    .case-metric-label { font-size: 0.8rem; color: var(--text-muted); }
+    /* === CASES === */
+    .cgrid { display: grid; grid-template-columns: repeat(auto-fit,minmax(340px,1fr)); gap: 24px; }
+    .ccard { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; transition: all .5s cubic-bezier(.16,1,.3,1); }
+    .ccard:hover { border-color: var(--border-hover); transform: translateY(-8px); box-shadow: 0 30px 80px rgba(250,204,21,.04); }
+    .cimg { height: 200px; background-size: cover; background-position: center; position: relative; transition: transform .7s cubic-bezier(.16,1,.3,1); overflow: hidden; }
+    .ccard:hover .cimg { transform: scale(1.06); }
+    .cimg::after { content:''; position: absolute; bottom: 0; left: 0; right: 0; height: 100px; background: linear-gradient(transparent, var(--bg-card)); }
+    .cbody { padding: 28px; }
+    .ctype { display: inline-block; font-size: .75rem; font-weight: 700; color: var(--yellow); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 10px; }
+    .ccard h3 { font-size: 1.15rem; margin-bottom: 12px; }
+    .ccard p { font-size: .9rem; color: #666; line-height: 1.65; margin-bottom: 20px; }
+    .cm { display: flex; gap: 24px; }
+    .cmv { font-family: var(--font-h); font-size: 1.5rem; font-weight: 700; color: var(--yellow); display: block; }
+    .cml { font-size: .8rem; color: #555; }
 
-    /* ===== PRICING ===== */
-    .pricing-section { background: linear-gradient(180deg, var(--bg) 0%, #0a0a14 100%); }
-    .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; align-items: start; }
-    .pricing-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 40px 28px;
-      transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-      position: relative;
-      overflow: hidden;
-    }
-    .pricing-card:hover { border-color: var(--border-hover); transform: translateY(-6px); }
-    .pricing-card.featured { border-color: rgba(129,140,248,0.3); background: linear-gradient(180deg, rgba(129,140,248,0.04) 0%, var(--bg-card) 100%); }
-    .pricing-card.featured::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 2px;
-      background: var(--gradient);
-    }
-    .pricing-popular {
-      position: absolute;
-      top: -1px; right: 24px;
-      background: var(--gradient);
-      color: white;
-      padding: 6px 16px;
-      border-radius: 0 0 10px 10px;
-      font-size: 0.75rem;
-      font-weight: 600;
-    }
-    .pricing-name { font-size: 0.85rem; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; }
-    .pricing-title { font-size: 1.5rem; margin-bottom: 16px; }
-    .pricing-desc { font-size: 0.9rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 28px; min-height: 58px; }
-    .pricing-features { list-style: none; margin-bottom: 32px; }
-    .pricing-features li { padding: 10px 0; font-size: 0.9rem; color: var(--text); display: flex; align-items: flex-start; gap: 12px; border-bottom: 1px solid var(--border); }
-    .pricing-features li:last-child { border-bottom: none; }
-    .pricing-features li svg { flex-shrink: 0; margin-top: 2px; }
-    .pricing-btn {
-      display: block;
-      width: 100%;
-      text-align: center;
-      padding: 14px;
-      border-radius: 12px;
-      font-family: var(--font-body);
-      font-size: 0.95rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s;
-      text-decoration: none;
-    }
-    .pricing-btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-heading); }
-    .pricing-btn-outline:hover { background: rgba(255,255,255,0.04); border-color: var(--border-hover); color: var(--text-heading); }
-    .pricing-btn-fill { background: var(--gradient); border: none; color: white; position: relative; overflow: hidden; }
-    .pricing-btn-fill::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent); transition: left 0.6s; }
-    .pricing-btn-fill:hover::before { left: 100%; }
-    .pricing-btn-fill:hover { box-shadow: 0 8px 32px rgba(129,140,248,0.3); transform: translateY(-1px); color: white; }
+    /* === PRICING === */
+    .pricegrid { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; align-items: start; }
+    .prcard { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 40px 28px; transition: all .5s cubic-bezier(.16,1,.3,1); position: relative; overflow: hidden; }
+    .prcard:hover { border-color: var(--border-hover); transform: translateY(-8px); }
+    .prcard.feat { border-color: rgba(250,204,21,.2); }
+    .prcard.feat::before { content:''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--yellow); }
+    .prpop { position: absolute; top: -1px; right: 24px; background: var(--yellow); color: #000; padding: 6px 16px; border-radius: 0 0 10px 10px; font-size: .75rem; font-weight: 700; }
+    .prname { font-size: .85rem; font-weight: 700; color: var(--yellow); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 12px; }
+    .prtitle { font-size: 1.5rem; margin-bottom: 16px; }
+    .prdesc { font-size: .9rem; color: #555; line-height: 1.6; margin-bottom: 28px; min-height: 58px; }
+    .prfeat { list-style: none; margin-bottom: 32px; }
+    .prfeat li { padding: 10px 0; font-size: .9rem; color: #999; display: flex; align-items: flex-start; gap: 12px; border-bottom: 1px solid var(--border); }
+    .prfeat li:last-child { border-bottom: none; }
+    .prfeat li svg { flex-shrink: 0; margin-top: 2px; }
+    .prbtn { display: block; width: 100%; text-align: center; padding: 14px; border-radius: 12px; font-family: var(--font-b); font-size: .95rem; font-weight: 700; cursor: pointer; transition: all .3s; text-decoration: none; }
+    .prbtn-o { background: transparent; border: 1px solid var(--border); color: #fff; }
+    .prbtn-o:hover { background: rgba(255,255,255,.04); border-color: var(--border-hover); color: #fff; }
+    .prbtn-f { background: var(--yellow); border: none; color: #000; position: relative; overflow: hidden; }
+    .prbtn-f::before { content:''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent); transition: left .5s; }
+    .prbtn-f:hover::before { left: 100%; }
+    .prbtn-f:hover { box-shadow: 0 12px 40px rgba(250,204,21,.25); transform: translateY(-2px); color: #000; }
 
-    /* ===== ABOUT ===== */
-    .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
-    .about-photo {
-      width: 100%;
-      aspect-ratio: 4/5;
-      border-radius: var(--radius);
-      object-fit: cover;
-      border: 1px solid var(--border);
-      transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-    }
-    .about-photo:hover { transform: scale(1.02) rotate(-1deg); }
-    .about-text h2 { font-size: clamp(1.75rem, 3vw, 2.5rem); margin-bottom: 24px; }
-    .about-text p { margin-bottom: 16px; color: var(--text-muted); line-height: 1.7; font-size: 1rem; }
-    .about-text p strong { color: var(--text-heading); font-weight: 600; }
-    .about-facts { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 32px; }
-    .about-fact {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 20px;
-      transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-    }
-    .about-fact:hover { border-color: var(--border-hover); transform: translateY(-3px); }
-    .about-fact-value { font-family: var(--font-heading); font-size: 1.75rem; font-weight: 700; color: var(--text-heading); display: block; margin-bottom: 4px; }
-    .about-fact-label { font-size: 0.85rem; color: var(--text-muted); }
+    /* === ABOUT === */
+    .abgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
+    .abimg { width: 100%; aspect-ratio: 4/5; border-radius: var(--radius); object-fit: cover; border: 1px solid var(--border); transition: transform .7s cubic-bezier(.16,1,.3,1); }
+    .abimg:hover { transform: scale(1.03) rotate(-1.5deg); }
+    .abtxt h2 { font-size: clamp(1.75rem,3vw,2.5rem); margin-bottom: 24px; }
+    .abtxt p { margin-bottom: 16px; color: #666; line-height: 1.7; font-size: 1rem; }
+    .abtxt strong { color: #fff; font-weight: 600; }
+    .abfacts { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 32px; }
+    .abf { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; transition: all .4s cubic-bezier(.16,1,.3,1); }
+    .abf:hover { border-color: rgba(250,204,21,.15); transform: translateY(-4px); }
+    .abfv { font-family: var(--font-h); font-size: 1.75rem; font-weight: 700; color: var(--yellow); display: block; margin-bottom: 4px; }
+    .abfl { font-size: .85rem; color: #555; }
 
-    /* ===== FAQ ===== */
-    .faq-list { max-width: 768px; margin: 0 auto; }
-    .faq-item { border-bottom: 1px solid var(--border); }
-    .faq-question {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 24px 0;
-      cursor: pointer;
-      font-family: var(--font-heading);
-      font-size: 1.05rem;
-      font-weight: 600;
-      color: var(--text-heading);
-      transition: color 0.3s;
-      gap: 16px;
-    }
-    .faq-question:hover { color: var(--accent); }
-    .faq-arrow {
-      flex-shrink: 0;
-      width: 32px; height: 32px;
-      border-radius: 8px;
-      background: rgba(255,255,255,0.04);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), background 0.3s;
-    }
-    .faq-arrow svg { width: 14px; height: 14px; stroke: var(--text-muted); }
-    .faq-item.open .faq-arrow { transform: rotate(180deg); background: rgba(129,140,248,0.1); }
-    .faq-item.open .faq-arrow svg { stroke: var(--accent); }
-    .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
-    .faq-item.open .faq-answer { max-height: 300px; }
-    .faq-answer p { padding-bottom: 24px; color: var(--text-muted); line-height: 1.7; font-size: 0.95rem; }
+    /* === FAQ === */
+    .flist { max-width: 768px; margin: 0 auto; }
+    .fitem { border-bottom: 1px solid var(--border); }
+    .fq { display: flex; justify-content: space-between; align-items: center; padding: 24px 0; cursor: pointer; font-family: var(--font-h); font-size: 1.05rem; font-weight: 600; color: #fff; transition: color .3s; gap: 16px; }
+    .fq:hover { color: var(--yellow); }
+    .farr { flex-shrink: 0; width: 32px; height: 32px; border-radius: 8px; background: rgba(255,255,255,.04); display: flex; align-items: center; justify-content: center; transition: transform .4s cubic-bezier(.16,1,.3,1), background .3s; }
+    .farr svg { width: 14px; height: 14px; stroke: #666; }
+    .fitem.open .farr { transform: rotate(180deg); background: var(--yellow-dim); }
+    .fitem.open .farr svg { stroke: var(--yellow); }
+    .fa { max-height: 0; overflow: hidden; transition: max-height .5s cubic-bezier(.16,1,.3,1); }
+    .fitem.open .fa { max-height: 300px; }
+    .fa p { padding-bottom: 24px; color: #666; line-height: 1.7; font-size: .95rem; }
 
-    /* ===== FINAL CTA ===== */
-    .cta-final { text-align: center; position: relative; overflow: hidden; }
-    .cta-final h2 { font-size: clamp(2rem, 4vw, 3rem); margin-bottom: 20px; position: relative; }
-    .cta-final > p { font-size: 1.1rem; color: var(--text-muted); max-width: 560px; margin: 0 auto 40px; line-height: 1.7; position: relative; }
-    .cta-final-buttons { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; position: relative; margin-bottom: 48px; }
-    .cta-contacts { display: flex; justify-content: center; gap: 32px; flex-wrap: wrap; position: relative; }
-    .cta-contact { display: flex; align-items: center; gap: 10px; color: var(--text-muted); font-size: 0.95rem; transition: color 0.3s; text-decoration: none; }
-    .cta-contact:hover { color: var(--text-heading); }
-    .cta-contact-icon {
-      width: 40px; height: 40px;
-      border-radius: 10px;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.3s;
-    }
-    .cta-contact:hover .cta-contact-icon { border-color: rgba(129,140,248,0.3); background: rgba(129,140,248,0.06); }
-    .cta-contact-icon svg { width: 18px; height: 18px; }
+    /* === CTA FINAL === */
+    .ctaf { text-align: center; position: relative; overflow: hidden; }
+    .ctaf h2 { font-size: clamp(2rem,4vw,3.2rem); margin-bottom: 20px; position: relative; }
+    .ctaf > p { font-size: 1.1rem; color: #666; max-width: 560px; margin: 0 auto 40px; line-height: 1.7; position: relative; }
+    .ctab { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; position: relative; margin-bottom: 48px; }
+    .ctac { display: flex; justify-content: center; gap: 32px; flex-wrap: wrap; position: relative; }
+    .ctaci { display: flex; align-items: center; gap: 10px; color: #666; font-size: .95rem; transition: color .3s; text-decoration: none; }
+    .ctaci:hover { color: #fff; }
+    .ctaicon { width: 40px; height: 40px; border-radius: 10px; background: rgba(255,255,255,.04); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; transition: all .3s; }
+    .ctaci:hover .ctaicon { border-color: rgba(250,204,21,.3); background: var(--yellow-dim); }
+    .ctaicon svg { width: 18px; height: 18px; }
 
-    /* ===== FOOTER ===== */
+    /* === FOOTER === */
     .footer { padding: 48px 0; border-top: 1px solid var(--border); }
-    .footer-inner { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
-    .footer-copy { font-size: 0.85rem; color: var(--text-muted); }
-    .footer-links { display: flex; gap: 24px; }
-    .footer-links a { font-size: 0.85rem; color: var(--text-muted); transition: color 0.3s; }
-    .footer-links a:hover { color: var(--text-heading); }
+    .footer-in { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+    .footer-c { font-size: .85rem; color: #444; }
+    .footer-l { display: flex; gap: 24px; }
+    .footer-l a { font-size: .85rem; color: #555; transition: color .3s; }
+    .footer-l a:hover { color: #fff; }
 
-    /* ===== FIXED MOBILE CTA ===== */
-    .mobile-cta-bar {
-      display: none;
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
-      z-index: 98;
-      padding: 12px 16px;
-      background: rgba(6,6,11,0.95);
-      backdrop-filter: blur(20px);
-      border-top: 1px solid var(--border);
-    }
-    .mobile-cta-bar .btn-primary { width: 100%; justify-content: center; padding: 14px; }
+    /* === MOBILE CTA === */
+    .mcta { display: none; position: fixed; bottom: 0; left: 0; right: 0; z-index: 98; padding: 12px 16px; background: rgba(0,0,0,.95); backdrop-filter: blur(20px); border-top: 1px solid var(--border); }
+    .mcta .btn-p { width: 100%; justify-content: center; padding: 14px; }
 
-    /* ===== RESPONSIVE ===== */
-    @media (max-width: 1024px) {
-      .pricing-grid { grid-template-columns: 1fr; max-width: 480px; margin: 0 auto; }
-      .solution-grid { grid-template-columns: 1fr; max-width: 480px; margin: 0 auto; }
-      .about-grid { grid-template-columns: 1fr; gap: 40px; }
-      .about-photo { max-width: 400px; margin: 0 auto; aspect-ratio: 1; }
-      .services-grid { grid-template-columns: 1fr; }
-      .process-grid { grid-template-columns: repeat(2, 1fr); }
+    /* === CHECK ICON (for pricing) === */
+    .chk { width: 16px; height: 16px; }
+
+    /* === MOUSE GLOW === */
+    .glow { position: relative; }
+    .glow::after { content:''; position: absolute; width: 350px; height: 350px; border-radius: 50%; background: radial-gradient(circle, var(--yellow-glow), transparent 70%); pointer-events: none; transform: translate(-50%,-50%); opacity: 0; transition: opacity .4s; left: var(--mx,50%); top: var(--my,50%); }
+    .glow:hover::after { opacity: 1; }
+
+    /* === RESPONSIVE === */
+    @media(max-width:1024px) {
+      .pricegrid,.sgrid { grid-template-columns: 1fr; max-width: 480px; margin: 0 auto; }
+      .abgrid { grid-template-columns: 1fr; gap: 40px; }
+      .abimg { max-width: 400px; margin: 0 auto; aspect-ratio: 1; }
+      .svgrid { grid-template-columns: 1fr; }
+      .prgrid { grid-template-columns: repeat(2,1fr); }
     }
-    @media (max-width: 768px) {
+    @media(max-width:768px) {
       section { padding: 80px 0; }
-      .nav-links, .nav-cta-wrap { display: none; }
-      .nav-burger { display: flex; }
-      .hero-stats { grid-template-columns: repeat(2, 1fr); }
-      .platforms-row { grid-template-columns: 1fr; max-width: 400px; margin: 0 auto; }
-      .process-grid { grid-template-columns: 1fr; max-width: 400px; margin: 0 auto; }
-      .cases-grid { grid-template-columns: 1fr; }
-      .mobile-cta-bar { display: block; }
+      .nav-links,.nav-cta-wrap { display: none; }
+      .burger { display: flex; }
+      .hero-stats { grid-template-columns: repeat(2,1fr); }
+      .plrow,.prgrid { grid-template-columns: 1fr; max-width: 400px; margin: 0 auto; }
+      .cgrid { grid-template-columns: 1fr; }
+      .mcta { display: block; }
       body { padding-bottom: 72px; }
-      .service-card { flex-direction: column; gap: 16px; }
-      .cta-contacts { flex-direction: column; align-items: center; }
-      .about-facts { grid-template-columns: 1fr 1fr; }
-      .footer-inner { flex-direction: column; text-align: center; }
-      .orb { opacity: 0.25; }
+      .svcard { flex-direction: column; gap: 16px; }
+      .ctac { flex-direction: column; align-items: center; }
+      .abfacts { grid-template-columns: 1fr 1fr; }
+      .footer-in { flex-direction: column; text-align: center; }
     }
-    @media (max-width: 480px) {
+    @media(max-width:480px) {
       .hero-stats { grid-template-columns: 1fr 1fr; }
-      .hero-buttons { flex-direction: column; }
-      .hero-buttons .btn-primary, .hero-buttons .btn-secondary { width: 100%; justify-content: center; }
-      .about-facts { grid-template-columns: 1fr; }
+      .hero-btns { flex-direction: column; }
+      .hero-btns .btn-p,.hero-btns .btn-s { width: 100%; justify-content: center; }
+      .abfacts { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
 
-<!-- NAV -->
 <nav class="nav" id="nav">
   <div class="nav-inner">
     <div class="nav-logo">eg<span>.</span>dev</div>
@@ -919,145 +337,63 @@
       <li><a href="#pricing">Тарифы</a></li>
       <li><a href="#faq">FAQ</a></li>
     </ul>
-    <div class="nav-cta-wrap">
-      <a href="#contact" class="nav-cta">Обсудить проект</a>
-    </div>
-    <button class="nav-burger" id="burger" aria-label="Меню">
-      <span></span><span></span><span></span>
-    </button>
+    <div class="nav-cta-wrap"><a href="#contact" class="nav-cta">Обсудить проект</a></div>
+    <button class="burger" id="burger" aria-label="Меню"><span></span><span></span><span></span></button>
   </div>
 </nav>
-
-<div class="mobile-menu" id="mobileMenu">
-  <a href="#services" onclick="closeMobileMenu()">Услуги</a>
-  <a href="#platforms" onclick="closeMobileMenu()">Платформы</a>
-  <a href="#process" onclick="closeMobileMenu()">Процесс</a>
-  <a href="#cases" onclick="closeMobileMenu()">Кейсы</a>
-  <a href="#pricing" onclick="closeMobileMenu()">Тарифы</a>
-  <a href="#faq" onclick="closeMobileMenu()">FAQ</a>
-  <a href="tel:+79214667744" class="btn-primary" onclick="closeMobileMenu()">Позвонить</a>
-</div>
+<div class="mob-menu" id="mob"><a href="#services" onclick="cmm()">Услуги</a><a href="#platforms" onclick="cmm()">Платформы</a><a href="#process" onclick="cmm()">Процесс</a><a href="#cases" onclick="cmm()">Кейсы</a><a href="#pricing" onclick="cmm()">Тарифы</a><a href="#faq" onclick="cmm()">FAQ</a><a href="tel:+79214667744" class="btn-p" onclick="cmm()">Позвонить</a></div>
 
 <!-- HERO -->
 <section class="hero">
-  <div class="orb-canvas">
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
-    <div class="orb orb-3"></div>
-  </div>
-  <div class="dot-grid"></div>
+  <div class="hero-bg"><div class="hero-orb hero-orb-1"></div><div class="hero-orb hero-orb-2"></div><div class="hero-grid"></div></div>
   <div class="container">
     <div class="hero-content">
-      <div class="hero-badge" style="opacity:0;animation:lineReveal 0.8s 0s cubic-bezier(0.22,1,0.36,1) forwards">Беру 2 проекта в месяц</div>
-      <h1>
-        <span class="hero-line">Ваши клиенты уже в мессенджере.</span>
-        <span class="hero-line"><span class="gradient-text">Пусть там и платят</span></span>
-      </h1>
-      <p class="hero-sub">
-        Делаю мини-приложения для Telegram, ВКонтакте и MAX, которые
-        записывают, напоминают, принимают оплату и возвращают клиентов —
-        пока вы занимаетесь своим делом.
-      </p>
-      <div class="hero-buttons">
-        <a href="#contact" class="btn-primary btn-magnetic">
-          Обсудить проект
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-        </a>
-        <a href="#cases" class="btn-secondary">Посмотреть кейсы</a>
+      <div class="hero-badge">Беру 2 проекта в месяц</div>
+      <h1><span class="hl">Ваши клиенты уже в мессенджере.</span><span class="hl"><span class="hl-y">Пусть там и платят</span></span></h1>
+      <p class="hero-sub">Делаю мини-приложения для Telegram, ВКонтакте и MAX, которые записывают, напоминают, принимают оплату и возвращают клиентов — пока вы занимаетесь своим делом.</p>
+      <div class="hero-btns">
+        <a href="#contact" class="btn-p" id="heroBtn">Обсудить проект <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></a>
+        <a href="#cases" class="btn-s">Посмотреть кейсы</a>
       </div>
       <div class="hero-stats">
-        <div class="hero-stat">
-          <span class="hero-stat-number" data-count="3">0</span>
-          <span class="hero-stat-label">Года в разработке</span>
-        </div>
-        <div class="hero-stat">
-          <span class="hero-stat-number" data-count="20">0</span>
-          <span class="hero-stat-label">Запущенных проектов</span>
-        </div>
-        <div class="hero-stat">
-          <span class="hero-stat-number" data-count="3">0</span>
-          <span class="hero-stat-label">Платформы</span>
-        </div>
-        <div class="hero-stat">
-          <span class="hero-stat-number">1-2 нед</span>
-          <span class="hero-stat-label">Срок запуска</span>
-        </div>
+        <div class="hero-stat"><span class="hero-stat-n" data-count="3" data-suffix="+">0</span><span class="hero-stat-l">Года в разработке</span></div>
+        <div class="hero-stat"><span class="hero-stat-n" data-count="20" data-suffix="+">0</span><span class="hero-stat-l">Запущенных проектов</span></div>
+        <div class="hero-stat"><span class="hero-stat-n" data-count="3" data-suffix="">0</span><span class="hero-stat-l">Платформы</span></div>
+        <div class="hero-stat"><span class="hero-stat-n">1-2 нед</span><span class="hero-stat-l">Срок запуска</span></div>
       </div>
     </div>
   </div>
 </section>
 
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee-track">
+    <span>Telegram Mini Apps</span><span><b>Онлайн-запись</b></span><span>VK Mini Apps</span><span><b>CRM</b></span><span>Оплата</span><span><b>Автоматизация</b></span><span>MAX</span><span><b>Аналитика</b></span><span>Реферальные программы</span><span><b>Геймификация</b></span>
+    <span>Telegram Mini Apps</span><span><b>Онлайн-запись</b></span><span>VK Mini Apps</span><span><b>CRM</b></span><span>Оплата</span><span><b>Автоматизация</b></span><span>MAX</span><span><b>Аналитика</b></span><span>Реферальные программы</span><span><b>Геймификация</b></span>
+  </div>
+</div>
+
 <!-- PROBLEMS -->
 <section id="problems">
   <div class="container">
-    <div class="section-header section-header-center">
-      <div class="section-label reveal">Знакомо?</div>
-      <h2 class="section-title reveal-blur">Вы работаете больше — а зарабатываете столько же</h2>
-      <p class="section-desc reveal-blur">Четыре причины, почему ваш бизнес буксует без цифровых инструментов</p>
-    </div>
-    <div class="problems-grid">
-      <div class="problem-card glow-card reveal-scale reveal-d1">
-        <div class="card-icon card-icon-red">
-          <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        </div>
-        <h3>Вечера уходят на переписку</h3>
-        <p>«Когда удобно?» — «А в четверг?» — «Четверг занят» — и так по кругу. 10-15 часов в неделю на то, что должно занимать ноль.</p>
-      </div>
-      <div class="problem-card glow-card reveal-scale reveal-d2">
-        <div class="card-icon card-icon-red">
-          <svg class="icon" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="17" y1="11" x2="22" y2="11"/></svg>
-        </div>
-        <h3>Каждый пятый слот пустует</h3>
-        <p>Клиент записался — и забыл. Вы ждёте, а он просто не пришёл. 20-25% записей превращаются в дыры в расписании.</p>
-      </div>
-      <div class="problem-card glow-card reveal-scale reveal-d3">
-        <div class="card-icon card-icon-red">
-          <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-        </div>
-        <h3>Пришёл один раз — и пропал</h3>
-        <p>Без напоминаний, бонусов и повода вернуться 30-40% клиентов уходят навсегда. Вы платите за привлечение, но не зарабатываете на удержании.</p>
-      </div>
-      <div class="problem-card glow-card reveal-scale reveal-d4">
-        <div class="card-icon card-icon-red">
-          <svg class="icon" viewBox="0 0 24 24"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
-        </div>
-        <h3>Управляете бизнесом вслепую</h3>
-        <p>Сколько вы заработали в этом месяце? Какой средний чек? Кто ваш лучший клиент? Если ответ «не знаю» — вы не растёте.</p>
-      </div>
+    <div class="sh shc"><div class="stag rv">Знакомо?</div><h2 class="stitle rv-blur">Вы работаете больше — а зарабатываете столько же</h2><p class="sdesc rv-blur">Четыре причины, почему ваш бизнес буксует без цифровых инструментов</p></div>
+    <div class="pgrid">
+      <div class="pcard glow rv-scale d1"><div class="ci ci-r"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><h3>Вечера уходят на переписку</h3><p>«Когда удобно?» — «А в четверг?» — «Четверг занят» — и так по кругу. 10-15 часов в неделю на то, что должно занимать ноль.</p></div>
+      <div class="pcard glow rv-scale d2"><div class="ci ci-r"><svg class="icon" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="17" y1="11" x2="22" y2="11"/></svg></div><h3>Каждый пятый слот пустует</h3><p>Клиент записался — и забыл. Вы ждёте, а он просто не пришёл. 20-25% записей превращаются в дыры в расписании.</p></div>
+      <div class="pcard glow rv-scale d3"><div class="ci ci-r"><svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><h3>Пришёл один раз — и пропал</h3><p>Без напоминаний, бонусов и повода вернуться 30-40% клиентов уходят навсегда. Вы платите за привлечение, но не зарабатываете на удержании.</p></div>
+      <div class="pcard glow rv-scale d4"><div class="ci ci-r"><svg class="icon" viewBox="0 0 24 24"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg></div><h3>Управляете бизнесом вслепую</h3><p>Сколько вы заработали в этом месяце? Какой средний чек? Кто ваш лучший клиент? Если ответ «не знаю» — вы не растёте.</p></div>
     </div>
   </div>
 </section>
 
 <!-- SOLUTION -->
-<section class="solution-section" id="solution">
+<section id="solution">
   <div class="container">
-    <div class="section-header section-header-center">
-      <div class="section-label reveal">Решение</div>
-      <h2 class="section-title reveal-blur">Приложение там, где уже есть ваши клиенты</h2>
-      <p class="section-desc reveal-blur">Не нужно заставлять людей скачивать что-то новое. Мини-приложение живёт внутри мессенджера, которым они пользуются каждый день</p>
-    </div>
-    <div class="solution-grid">
-      <div class="solution-card glow-card reveal-scale reveal-d1">
-        <div class="card-icon card-icon-accent">
-          <svg class="icon" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
-        </div>
-        <h3>Открыл Telegram — и уже внутри</h3>
-        <p>Клиент нажимает одну кнопку и попадает в ваш сервис. Никаких паролей, App Store и «подтвердите email». Конверсия в разы выше, чем у сайтов.</p>
-      </div>
-      <div class="solution-card glow-card reveal-scale reveal-d2">
-        <div class="card-icon card-icon-accent">
-          <svg class="icon" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-        </div>
-        <h3>Работает, пока вы спите</h3>
-        <p>Утром вы открываете телефон — а там 5 новых записей, все получили напоминания, один клиент уже оплатил. 1-2 часа в неделю вместо 15.</p>
-      </div>
-      <div class="solution-card glow-card reveal-scale reveal-d3">
-        <div class="card-icon card-icon-accent">
-          <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
-        </div>
-        <h3>Не просто удобство — деньги</h3>
-        <p>Пакеты повышают средний чек. Реактивация возвращает «уснувших». Рефералы приводят новых. Каждый модуль — прямой рост выручки на 40-60%.</p>
-      </div>
+    <div class="sh shc"><div class="stag rv">Решение</div><h2 class="stitle rv-blur">Приложение там, где уже есть ваши клиенты</h2><p class="sdesc rv-blur">Не нужно заставлять людей скачивать что-то новое. Мини-приложение живёт внутри мессенджера</p></div>
+    <div class="sgrid">
+      <div class="scard glow rv-scale d1"><div class="ci ci-y"><svg class="icon" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></div><h3>Открыл Telegram — и уже внутри</h3><p>Клиент нажимает одну кнопку и попадает в ваш сервис. Никаких паролей, App Store и «подтвердите email». Конверсия в разы выше, чем у сайтов.</p></div>
+      <div class="scard glow rv-scale d2"><div class="ci ci-y"><svg class="icon" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div><h3>Работает, пока вы спите</h3><p>Утром вы открываете телефон — а там 5 новых записей, все получили напоминания, один клиент уже оплатил. 1-2 часа в неделю вместо 15.</p></div>
+      <div class="scard glow rv-scale d3"><div class="ci ci-y"><svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg></div><h3>Не просто удобство — деньги</h3><p>Пакеты повышают средний чек. Реактивация возвращает «уснувших». Рефералы приводят новых. Каждый модуль — прямой рост выручки на 40-60%.</p></div>
     </div>
   </div>
 </section>
@@ -1065,68 +401,12 @@
 <!-- SERVICES -->
 <section id="services">
   <div class="container">
-    <div class="section-header">
-      <div class="section-label reveal">Что я создаю</div>
-      <h2 class="section-title reveal-blur">Модули, которые закрывают реальные задачи</h2>
-      <p class="section-desc reveal-blur">Собираю приложение из готовых блоков — берёте только то, что нужно вашему бизнесу</p>
-    </div>
-    <div class="services-grid">
-      <div class="service-card glow-card reveal-scale reveal-d1">
-        <div class="card-icon card-icon-accent">
-          <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        </div>
-        <div>
-          <h3>Онлайн-запись без вашего участия</h3>
-          <p>Клиент видит свободные слоты, записывается за 30 секунд, получает напоминание за день и за час. Вы просто видите готовое расписание.</p>
-          <div class="service-tags">
-            <span class="service-tag">Календарь</span>
-            <span class="service-tag">Push-напоминания</span>
-            <span class="service-tag">Управление слотами</span>
-          </div>
-        </div>
-      </div>
-      <div class="service-card glow-card reveal-scale reveal-d2">
-        <div class="card-icon card-icon-accent">
-          <svg class="icon" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-        </div>
-        <div>
-          <h3>Оплата одной кнопкой</h3>
-          <p>Клиент записался — тут же оплатил. Картой, через ЮKassa или Telegram Stars. Пакеты сессий и сертификаты поднимают средний чек без лишних разговоров.</p>
-          <div class="service-tags">
-            <span class="service-tag">ЮKassa</span>
-            <span class="service-tag">Telegram Stars</span>
-            <span class="service-tag">Абонементы</span>
-          </div>
-        </div>
-      </div>
-      <div class="service-card glow-card reveal-scale reveal-d3">
-        <div class="card-icon card-icon-accent">
-          <svg class="icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        </div>
-        <div>
-          <h3>Вы знаете каждого клиента</h3>
-          <p>Когда пришёл, сколько раз был, что покупал, ваши заметки к нему. Приходите на встречу подготовленным — клиент чувствует заботу и остаётся дольше.</p>
-          <div class="service-tags">
-            <span class="service-tag">Карточки клиентов</span>
-            <span class="service-tag">Сегментация</span>
-            <span class="service-tag">Аналитика</span>
-          </div>
-        </div>
-      </div>
-      <div class="service-card glow-card reveal-scale reveal-d4">
-        <div class="card-icon card-icon-accent">
-          <svg class="icon" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-        </div>
-        <div>
-          <h3>Клиенты возвращаются сами</h3>
-          <p>Пропал на 2 недели — получил сообщение со скидкой. Привёл друга — получил бонус. Прошёл 10 сессий — получил достижение. Система работает за вас.</p>
-          <div class="service-tags">
-            <span class="service-tag">Реактивация</span>
-            <span class="service-tag">Рефералы</span>
-            <span class="service-tag">Геймификация</span>
-          </div>
-        </div>
-      </div>
+    <div class="sh"><div class="stag rv">Что я создаю</div><h2 class="stitle rv-blur">Модули, которые закрывают реальные задачи</h2><p class="sdesc rv-blur">Собираю приложение из готовых блоков — берёте только то, что нужно вашему бизнесу</p></div>
+    <div class="svgrid">
+      <div class="svcard glow rv-left d1"><div class="ci ci-y"><svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div><h3>Онлайн-запись без вашего участия</h3><p>Клиент видит свободные слоты, записывается за 30 секунд, получает напоминание за день и за час. Вы просто видите готовое расписание.</p><div class="tags"><span class="tag">Календарь</span><span class="tag">Push-напоминания</span><span class="tag">Управление слотами</span></div></div></div>
+      <div class="svcard glow rv-right d2"><div class="ci ci-y"><svg class="icon" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div><div><h3>Оплата одной кнопкой</h3><p>Клиент записался — тут же оплатил. Картой, через ЮKassa или Telegram Stars. Пакеты сессий и сертификаты поднимают средний чек без лишних разговоров.</p><div class="tags"><span class="tag">ЮKassa</span><span class="tag">Telegram Stars</span><span class="tag">Абонементы</span></div></div></div>
+      <div class="svcard glow rv-left d3"><div class="ci ci-y"><svg class="icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div><h3>Вы знаете каждого клиента</h3><p>Когда пришёл, сколько раз был, что покупал, ваши заметки к нему. Приходите на встречу подготовленным — клиент чувствует заботу и остаётся дольше.</p><div class="tags"><span class="tag">Карточки клиентов</span><span class="tag">Сегментация</span><span class="tag">Аналитика</span></div></div></div>
+      <div class="svcard glow rv-right d4"><div class="ci ci-y"><svg class="icon" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></div><div><h3>Клиенты возвращаются сами</h3><p>Пропал на 2 недели — получил сообщение со скидкой. Привёл друга — получил бонус. Прошёл 10 сессий — получил достижение. Система работает за вас.</p><div class="tags"><span class="tag">Реактивация</span><span class="tag">Рефералы</span><span class="tag">Геймификация</span></div></div></div>
     </div>
   </div>
 </section>
@@ -1134,32 +414,19 @@
 <!-- PLATFORMS -->
 <section id="platforms">
   <div class="container">
-    <div class="section-header section-header-center">
-      <div class="section-label reveal">Платформы</div>
-      <h2 class="section-title reveal-blur">Работаю с тремя мессенджерами</h2>
-      <p class="section-desc reveal-blur">Ваше приложение будет там, где ваши клиенты уже проводят время каждый день</p>
-    </div>
-    <div class="platforms-row">
-      <div class="platform-card glow-card reveal-scale reveal-d1">
-        <div class="platform-logo platform-tg">
-          <svg class="icon" viewBox="0 0 24 24" stroke="white"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-        </div>
-        <h3>Telegram</h3>
-        <p>95 млн пользователей в России. Mini Apps с оплатой через Stars и банковские карты, push-уведомлениями и полным доступом к Telegram API.</p>
+    <div class="sh shc"><div class="stag rv">Платформы</div><h2 class="stitle rv-blur">Работаю с тремя мессенджерами</h2><p class="sdesc rv-blur">Ваше приложение будет там, где ваши клиенты уже проводят время каждый день</p></div>
+    <div class="plrow">
+      <div class="plcard glow rv-scale d1">
+        <div class="pl-logo pl-tg"><img src="https://cdn.simpleicons.org/telegram/white" alt="Telegram" /></div>
+        <h3>Telegram</h3><p>95 млн пользователей в России. Mini Apps с оплатой через Stars и банковские карты, push-уведомлениями и полным доступом к Telegram API.</p>
       </div>
-      <div class="platform-card glow-card reveal-scale reveal-d2">
-        <div class="platform-logo platform-vk">
-          <svg class="icon" viewBox="0 0 24 24" stroke="white"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        </div>
-        <h3>ВКонтакте</h3>
-        <p>Если ваша аудитория в ВК — приложение тоже должно быть там. Интеграция с VK Pay, сообществами и рекламным кабинетом из коробки.</p>
+      <div class="plcard glow rv-scale d2">
+        <div class="pl-logo pl-vk"><img src="https://cdn.simpleicons.org/vk/white" alt="VK" /></div>
+        <h3>ВКонтакте</h3><p>Если ваша аудитория в ВК — приложение тоже должно быть там. Интеграция с VK Pay, сообществами и рекламным кабинетом из коробки.</p>
       </div>
-      <div class="platform-card glow-card reveal-scale reveal-d3">
-        <div class="platform-logo platform-max">
-          <svg class="icon" viewBox="0 0 24 24" stroke="white"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
-        </div>
-        <h3>MAX</h3>
-        <p>Новая платформа — минимум конкуренции. Пока другие выжидают, вы уже принимаете заявки и оплаты от первых клиентов.</p>
+      <div class="plcard glow rv-scale d3">
+        <div class="pl-logo pl-max"><svg width="34" height="34" viewBox="0 0 24 24" fill="none"><path d="M3 17V7l4.5 5L12 7l4.5 5L21 7v10" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <h3>MAX</h3><p>Новая платформа — минимум конкуренции. Пока другие выжидают, вы уже принимаете заявки и оплаты от первых клиентов.</p>
       </div>
     </div>
   </div>
@@ -1168,32 +435,12 @@
 <!-- PROCESS -->
 <section id="process">
   <div class="container">
-    <div class="section-header section-header-center">
-      <div class="section-label reveal">Как это работает</div>
-      <h2 class="section-title reveal-blur">От разговора до первых записей — 1-2 недели</h2>
-      <p class="section-desc reveal-blur">Вам не нужно разбираться в технологиях. Расскажите про бизнес — остальное сделаю я</p>
-    </div>
-    <div class="process-grid">
-      <div class="process-step reveal-scale reveal-d1">
-        <div class="step-number">1</div>
-        <h3>Созваниваемся</h3>
-        <p>30 минут — и я понимаю, что вам нужно. На следующий день присылаю план с модулями и стоимостью.</p>
-      </div>
-      <div class="process-step reveal-scale reveal-d2">
-        <div class="step-number">2</div>
-        <h3>Согласуем дизайн</h3>
-        <p>Показываю каждый экран до начала разработки. Вы видите конечный результат до того, как написана первая строчка кода.</p>
-      </div>
-      <div class="process-step reveal-scale reveal-d3">
-        <div class="step-number">3</div>
-        <h3>Собираю приложение</h3>
-        <p>Пишу код, подключаю оплату, настраиваю уведомления. Каждые 3-4 дня показываю, что готово — без сюрпризов.</p>
-      </div>
-      <div class="process-step reveal-scale reveal-d4">
-        <div class="step-number">4</div>
-        <h3>Запускаем</h3>
-        <p>Разворачиваю, объясняю за 30 минут как всем управлять. Остаюсь на связи после старта. Первые записи приходят в день запуска.</p>
-      </div>
+    <div class="sh shc"><div class="stag rv">Как это работает</div><h2 class="stitle rv-blur">От разговора до первых записей — 1-2 недели</h2><p class="sdesc rv-blur">Вам не нужно разбираться в технологиях. Расскажите про бизнес — остальное сделаю я</p></div>
+    <div class="prgrid">
+      <div class="prstep rv-scale d1"><div class="sn">1</div><h3>Созваниваемся</h3><p>30 минут — и я понимаю, что вам нужно. На следующий день присылаю план с модулями и стоимостью.</p></div>
+      <div class="prstep rv-scale d2"><div class="sn">2</div><h3>Согласуем дизайн</h3><p>Показываю каждый экран до начала разработки. Вы видите конечный результат до того, как написана первая строчка кода.</p></div>
+      <div class="prstep rv-scale d3"><div class="sn">3</div><h3>Собираю приложение</h3><p>Пишу код, подключаю оплату, настраиваю уведомления. Каждые 3-4 дня показываю, что готово — без сюрпризов.</p></div>
+      <div class="prstep rv-scale d4"><div class="sn">4</div><h3>Запускаем</h3><p>Разворачиваю, объясняю за 30 минут как всем управлять. Остаюсь на связи после старта. Первые записи приходят в день запуска.</p></div>
     </div>
   </div>
 </section>
@@ -1201,109 +448,23 @@
 <!-- CASES -->
 <section id="cases">
   <div class="container">
-    <div class="section-header section-header-center">
-      <div class="section-label reveal">Кейсы</div>
-      <h2 class="section-title reveal-blur">Что получают клиенты после запуска</h2>
-      <p class="section-desc reveal-blur">Три проекта — три разных задачи. Общее одно: экономия времени и рост дохода</p>
-    </div>
-    <div class="cases-grid">
-      <div class="case-card reveal-scale reveal-d1">
-        <div class="case-image" style="background: linear-gradient(135deg, #667eea20, #764ba220), url('https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=600&q=80') center/cover;"></div>
-        <div class="case-body">
-          <span class="case-type">Telegram Mini App</span>
-          <h3>Психолог: «Я перестала работать секретарём»</h3>
-          <p>Раньше каждый вечер — 2 часа на переписку о записях. Теперь клиенты записываются сами, получают напоминания, покупают пакеты сессий. Свободные вечера вернулись.</p>
-          <div class="case-metrics">
-            <div><span class="case-metric-value">-85%</span><span class="case-metric-label">Времени на рутину</span></div>
-            <div><span class="case-metric-value">+35%</span><span class="case-metric-label">Средний чек (пакеты)</span></div>
-          </div>
-        </div>
-      </div>
-      <div class="case-card reveal-scale reveal-d2">
-        <div class="case-image" style="background: linear-gradient(135deg, #22d3ee20, #667eea20), url('https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=600&q=80') center/cover;"></div>
-        <div class="case-body">
-          <span class="case-type">Telegram Mini App</span>
-          <h3>Фитнес-тренер: клиенты приводят друзей</h3>
-          <p>Подключил реферальную программу с бонусами. Клиенты делятся ссылкой, потому что получают скидку на следующую тренировку. 20% новых клиентов — по рекомендациям.</p>
-          <div class="case-metrics">
-            <div><span class="case-metric-value">+40%</span><span class="case-metric-label">Выручка с клиента</span></div>
-            <div><span class="case-metric-value">&times;2</span><span class="case-metric-label">Рост по рефералам</span></div>
-          </div>
-        </div>
-      </div>
-      <div class="case-card reveal-scale reveal-d3">
-        <div class="case-image" style="background: linear-gradient(135deg, #a78bfa20, #22d3ee20), url('https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=600&q=80') center/cover;"></div>
-        <div class="case-body">
-          <span class="case-type">Telegram Mini App</span>
-          <h3>Нутрициолог: клиенты перестали бросать программу</h3>
-          <p>Добавили дневник питания и трекер привычек. Между сессиями клиенты заполняют данные, видят свой прогресс — и мотивация не падает. Продление программ выросло на треть.</p>
-          <div class="case-metrics">
-            <div><span class="case-metric-value">75%</span><span class="case-metric-label">Доходят до конца</span></div>
-            <div><span class="case-metric-value">+30%</span><span class="case-metric-label">Продляют программу</span></div>
-          </div>
-        </div>
-      </div>
+    <div class="sh shc"><div class="stag rv">Кейсы</div><h2 class="stitle rv-blur">Что получают клиенты после запуска</h2><p class="sdesc rv-blur">Три проекта — три разных задачи. Общее одно: экономия времени и рост дохода</p></div>
+    <div class="cgrid">
+      <div class="ccard rv-scale d1"><div class="cimg" style="background:linear-gradient(135deg,rgba(250,204,21,.08),rgba(0,0,0,.3)),url('https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=600&q=80') center/cover"></div><div class="cbody"><span class="ctype">Telegram Mini App</span><h3>Психолог: «Я перестала работать секретарём»</h3><p>Раньше каждый вечер — 2 часа на переписку о записях. Теперь клиенты записываются сами, получают напоминания, покупают пакеты сессий.</p><div class="cm"><div><span class="cmv">-85%</span><span class="cml">Времени на рутину</span></div><div><span class="cmv">+35%</span><span class="cml">Средний чек</span></div></div></div></div>
+      <div class="ccard rv-scale d2"><div class="cimg" style="background:linear-gradient(135deg,rgba(250,204,21,.08),rgba(0,0,0,.3)),url('https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=600&q=80') center/cover"></div><div class="cbody"><span class="ctype">Telegram Mini App</span><h3>Фитнес-тренер: клиенты приводят друзей</h3><p>Подключил реферальную программу с бонусами. Клиенты делятся ссылкой, потому что получают скидку. 20% новых — по рекомендациям.</p><div class="cm"><div><span class="cmv">+40%</span><span class="cml">Выручка с клиента</span></div><div><span class="cmv">&times;2</span><span class="cml">Рост по рефералам</span></div></div></div></div>
+      <div class="ccard rv-scale d3"><div class="cimg" style="background:linear-gradient(135deg,rgba(250,204,21,.08),rgba(0,0,0,.3)),url('https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=600&q=80') center/cover"></div><div class="cbody"><span class="ctype">Telegram Mini App</span><h3>Нутрициолог: клиенты перестали бросать программу</h3><p>Добавили дневник питания и трекер привычек. Между сессиями клиенты видят свой прогресс — мотивация не падает.</p><div class="cm"><div><span class="cmv">75%</span><span class="cml">Доходят до конца</span></div><div><span class="cmv">+30%</span><span class="cml">Продляют программу</span></div></div></div></div>
     </div>
   </div>
 </section>
 
 <!-- PRICING -->
-<section class="pricing-section" id="pricing">
+<section id="pricing">
   <div class="container">
-    <div class="section-header section-header-center">
-      <div class="section-label reveal">Тарифы</div>
-      <h2 class="section-title reveal-blur">Три пакета — от простого к мощному</h2>
-      <p class="section-desc reveal-blur">Начните с того, что нужно сейчас. Добавить функции можно в любой момент</p>
-    </div>
-    <div class="pricing-grid">
-      <div class="pricing-card glow-card reveal-scale reveal-d1">
-        <div class="pricing-name">Базовый</div>
-        <h3 class="pricing-title">Забудьте про переписку</h3>
-        <p class="pricing-desc">Клиенты записываются сами, получают напоминания, вы видите расписание — и всё</p>
-        <ul class="pricing-features">
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Онлайн-запись 24/7</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Автоматические напоминания</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Профиль эксперта</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Каталог услуг с ценами</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Система отзывов</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Подтверждение оплаты</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>История записей клиента</li>
-        </ul>
-        <a href="#contact" class="pricing-btn pricing-btn-outline">Обсудить</a>
-      </div>
-      <div class="pricing-card featured glow-card gradient-border reveal-scale reveal-d2">
-        <div class="pricing-popular">Популярный</div>
-        <div class="pricing-name">Стандарт</div>
-        <h3 class="pricing-title">Зарабатывайте больше с тех же клиентов</h3>
-        <p class="pricing-desc">Пакеты сессий, реактивация «уснувших», CRM — всё что нужно для роста выручки</p>
-        <ul class="pricing-features">
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Всё из базового пакета</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Пакеты сессий и абонементы</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>CRM и карточка клиента</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Финансовая аналитика</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Автоматическая реактивация</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Реферальная программа</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Персональные рассылки</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Заметки эксперта к клиенту</li>
-        </ul>
-        <a href="#contact" class="pricing-btn pricing-btn-fill">Обсудить</a>
-      </div>
-      <div class="pricing-card glow-card reveal-scale reveal-d3">
-        <div class="pricing-name">Премиум</div>
-        <h3 class="pricing-title">Бизнес растёт без пропорционального роста часов</h3>
-        <p class="pricing-desc">Групповые программы, геймификация, сертификаты — масштаб без выгорания</p>
-        <ul class="pricing-features">
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Всё из стандартного пакета</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Групповые программы и курсы</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Геймификация и достижения</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Дневник практик и трекеры</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Подарочные сертификаты</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Telegram Stars / ЮKassa</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Промокоды и скидки</li>
-          <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Расширенная аналитика</li>
-        </ul>
-        <a href="#contact" class="pricing-btn pricing-btn-outline">Обсудить</a>
-      </div>
+    <div class="sh shc"><div class="stag rv">Тарифы</div><h2 class="stitle rv-blur">Три пакета — от простого к мощному</h2><p class="sdesc rv-blur">Начните с того, что нужно сейчас. Добавить функции можно в любой момент</p></div>
+    <div class="pricegrid">
+      <div class="prcard glow rv-scale d1"><div class="prname">Базовый</div><h3 class="prtitle">Забудьте про переписку</h3><p class="prdesc">Клиенты записываются сами, получают напоминания, вы видите расписание — и всё</p><ul class="prfeat"><li><svg class="chk" viewBox="0 0 24 24" fill="none" stroke="#facc15" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Онлайн-запись 24/7</li><li><svg class="chk" viewBox="0 0 24 24" fill="none" stroke="#facc15" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Автоматические напоминания</li><li><svg class="chk" viewBox="0 0 24 24" fill="none" stroke="#facc15" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Профиль эксперта</li><li><svg class="chk" viewBox="0 0 24 24" fill="none" stroke="#facc15" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Каталог услуг с ценами</li><li><svg class="chk" viewBox="0 0 24 24" fill="none" stroke="#facc15" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Система отзывов</li><li><svg class="chk" viewBox="0 0 24 24" fill="none" stroke="#facc15" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Подтверждение оплаты</li><li><svg class="chk" viewBox="0 0 24 24" fill="none" stroke="#facc15" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>История записей клиента</li></ul><a href="#contact" class="prbtn prbtn-o">Обсудить</a></div>
+      <div class="prcard feat glow rv-scale d2"><div class="prpop">Популярный</div><div class="prname">Стандарт</div><h3 class="prtitle">Зарабатывайте больше с тех же клиентов</h3><p class="prdesc">Пакеты сессий, реактивация «уснувших», CRM — всё что нужно для роста выручки</p><ul class="prfeat"><li><svg class="chk" viewBox="0 0 24 24" fill="none" stroke="#facc15" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Всё из базового пакета</li><li><svg class="chk" viewBox="0 0 24 24" fill="none" stroke="#facc15" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Пакеты сессий и абонементы</li><li><svg class="chk" viewBox="0 0 24 24" fill="none" stroke="#facc15" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>CRM и карточка клиента</li><li><svg class="chk" viewBox="0 0 24 24" fill="none" stroke="#facc15" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Финансовая аналитика</li><li><svg class="chk" viewBox="0 0 24 24" fill="none" stroke="#facc15" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Автоматическая реактивация</li><li><svg class="chk" viewBox="0 0 24 24" fill="none" stroke="#facc15" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Реферальная программа</li><li><svg class="chk" viewBox="0 0 24 24" fill="none" stroke="#facc15" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Персональные рассылки</li><li><svg class="chk" viewBox="0 0 24 24" fill="none" stroke="#facc15" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Заметки эксперта к клиенту</li></ul><a href="#contact" class="prbtn prbtn-f">Обсудить</a></div>
+      <div class="prcard glow rv-scale d3"><div class="prname">Премиум</div><h3 class="prtitle">Бизнес растёт без пропорционального роста часов</h3><p class="prdesc">Групповые программы, геймификация, сертификаты — масштаб без выгорания</p><ul class="prfeat"><li><svg class="chk" viewBox="0 0 24 24" fill="none" stroke="#facc15" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Всё из стандартного пакета</li><li><svg class="chk" viewBox="0 0 24 24" fill="none" stroke="#facc15" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Групповые программы и курсы</li><li><svg class="chk" viewBox="0 0 24 24" fill="none" stroke="#facc15" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Геймификация и достижения</li><li><svg class="chk" viewBox="0 0 24 24" fill="none" stroke="#facc15" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Дневник практик и трекеры</li><li><svg class="chk" viewBox="0 0 24 24" fill="none" stroke="#facc15" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Подарочные сертификаты</li><li><svg class="chk" viewBox="0 0 24 24" fill="none" stroke="#facc15" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Telegram Stars / ЮKassa</li><li><svg class="chk" viewBox="0 0 24 24" fill="none" stroke="#facc15" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Промокоды и скидки</li><li><svg class="chk" viewBox="0 0 24 24" fill="none" stroke="#facc15" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Расширенная аналитика</li></ul><a href="#contact" class="prbtn prbtn-o">Обсудить</a></div>
     </div>
   </div>
 </section>
@@ -1311,19 +472,19 @@
 <!-- ABOUT -->
 <section id="about">
   <div class="container">
-    <div class="about-grid">
-      <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&q=80" alt="Егор Гуменюк — разработчик мини-приложений" class="about-photo reveal-scale" loading="lazy" />
-      <div class="about-text">
-        <div class="section-label reveal">Обо мне</div>
-        <h2 class="reveal-blur">Егор Гуменюк</h2>
-        <p class="reveal">Живу в Петрозаводске, работаю с клиентами по всей России. Занимаюсь одним делом — <strong>мини-приложениями для Telegram, ВКонтакте и MAX</strong>.</p>
-        <p class="reveal">Мне неинтересно делать «просто красивые экраны». Каждая кнопка в моих проектах существует, потому что она <strong>экономит время, поднимает чек или возвращает клиента</strong>. Если функция не влияет на деньги — я её не добавляю.</p>
-        <p class="reveal">Работаю под ключ: от первого созвона до момента, когда вы получаете первую автоматическую запись. Разбираться в технологиях не придётся — это моя работа, не ваша.</p>
-        <div class="about-facts reveal">
-          <div class="about-fact"><span class="about-fact-value">3+</span><span class="about-fact-label">Года опыта</span></div>
-          <div class="about-fact"><span class="about-fact-value">20+</span><span class="about-fact-label">Проектов</span></div>
-          <div class="about-fact"><span class="about-fact-value">3</span><span class="about-fact-label">Платформы</span></div>
-          <div class="about-fact"><span class="about-fact-value">100%</span><span class="about-fact-label">Под ключ</span></div>
+    <div class="abgrid">
+      <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&q=80" alt="Егор Гуменюк" class="abimg rv-left" loading="lazy" />
+      <div class="abtxt">
+        <div class="stag rv">Обо мне</div>
+        <h2 class="rv-blur">Егор Гуменюк</h2>
+        <p class="rv">Живу в Петрозаводске, работаю с клиентами по всей России. Занимаюсь одним делом — <strong>мини-приложениями для Telegram, ВКонтакте и MAX</strong>.</p>
+        <p class="rv">Мне неинтересно делать «просто красивые экраны». Каждая кнопка в моих проектах существует, потому что она <strong>экономит время, поднимает чек или возвращает клиента</strong>. Если функция не влияет на деньги — я её не добавляю.</p>
+        <p class="rv">Работаю под ключ: от первого созвона до момента, когда вы получаете первую автоматическую запись. Разбираться в технологиях не придётся — это моя работа, не ваша.</p>
+        <div class="abfacts rv">
+          <div class="abf"><span class="abfv">3+</span><span class="abfl">Года опыта</span></div>
+          <div class="abf"><span class="abfv">20+</span><span class="abfl">Проектов</span></div>
+          <div class="abf"><span class="abfv">3</span><span class="abfl">Платформы</span></div>
+          <div class="abf"><span class="abfv">100%</span><span class="abfl">Под ключ</span></div>
         </div>
       </div>
     </div>
@@ -1333,178 +494,94 @@
 <!-- FAQ -->
 <section id="faq">
   <div class="container">
-    <div class="section-header section-header-center">
-      <div class="section-label reveal">Вопросы</div>
-      <h2 class="section-title reveal-blur">Частые вопросы</h2>
-    </div>
-    <div class="faq-list">
-      <div class="faq-item reveal"><div class="faq-question" onclick="toggleFaq(this)"><span>Мои клиенты разберутся в мини-приложении?</span><div class="faq-arrow"><svg viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div><div class="faq-answer"><p>Если ваш клиент умеет написать сообщение в Telegram — он разберётся. Открыл, нажал кнопку, выбрал время, записался. Без скачиваний, паролей и инструкций. Это проще, чем заказать такси.</p></div></div>
-      <div class="faq-item reveal"><div class="faq-question" onclick="toggleFaq(this)"><span>Сколько времени займёт разработка?</span><div class="faq-arrow"><svg viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div><div class="faq-answer"><p>Базовый пакет — 1-2 недели. Стандартный — 2-3 недели. Премиум — до 4 недель. Точные сроки назову после первого созвона, когда пойму объём задач. Показываю промежуточные результаты каждые 3-4 дня — вы всегда в курсе.</p></div></div>
-      <div class="faq-item reveal"><div class="faq-question" onclick="toggleFaq(this)"><span>Можно потом добавить новые функции?</span><div class="faq-arrow"><svg viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div><div class="faq-answer"><p>Да, для этого всё и задумано. Начинаете с записи и напоминаний, через месяц подключаете оплату, ещё через два — реферальную программу. Новые модули добавляются без переделки того, что уже работает.</p></div></div>
-      <div class="faq-item reveal"><div class="faq-question" onclick="toggleFaq(this)"><span>Как происходит оплата клиентами?</span><div class="faq-arrow"><svg viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div><div class="faq-answer"><p>Клиент нажимает «Оплатить» прямо в мини-приложении — картой через ЮKassa, Robokassa или Telegram Stars. Деньги идут на ваш счёт. Комиссию платёжной системы определяет выбранный провайдер, я на неё не влияю.</p></div></div>
-      <div class="faq-item reveal"><div class="faq-question" onclick="toggleFaq(this)"><span>Что если мне нужно что-то нестандартное?</span><div class="faq-arrow"><svg viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div><div class="faq-answer"><p>Расскажите на созвоне — скорее всего, я уже делал что-то похожее. Пакеты покрывают 80% задач, но если нужна кастомная логика — соберу под вас. Назову сроки и стоимость до начала работы.</p></div></div>
-      <div class="faq-item reveal"><div class="faq-question" onclick="toggleFaq(this)"><span>Есть поддержка после запуска?</span><div class="faq-arrow"><svg viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div><div class="faq-answer"><p>Обязательно. После запуска провожу обучение, остаюсь на связи и отвечаю на вопросы. Если что-то сломается — починю. Нужна доработка через полгода — сделаю. Я не исчезаю после сдачи проекта.</p></div></div>
+    <div class="sh shc"><div class="stag rv">Вопросы</div><h2 class="stitle rv-blur">Частые вопросы</h2></div>
+    <div class="flist">
+      <div class="fitem rv"><div class="fq" onclick="tf(this)"><span>Мои клиенты разберутся в мини-приложении?</span><div class="farr"><svg viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div><div class="fa"><p>Если ваш клиент умеет написать сообщение в Telegram — он разберётся. Открыл, нажал кнопку, выбрал время, записался. Без скачиваний, паролей и инструкций. Это проще, чем заказать такси.</p></div></div>
+      <div class="fitem rv"><div class="fq" onclick="tf(this)"><span>Сколько времени займёт разработка?</span><div class="farr"><svg viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div><div class="fa"><p>Базовый пакет — 1-2 недели. Стандартный — 2-3 недели. Премиум — до 4 недель. Точные сроки назову после первого созвона. Показываю промежуточные результаты каждые 3-4 дня.</p></div></div>
+      <div class="fitem rv"><div class="fq" onclick="tf(this)"><span>Можно потом добавить новые функции?</span><div class="farr"><svg viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div><div class="fa"><p>Да, для этого всё и задумано. Начинаете с записи и напоминаний, через месяц подключаете оплату, ещё через два — реферальную программу. Новые модули добавляются без переделки того, что уже работает.</p></div></div>
+      <div class="fitem rv"><div class="fq" onclick="tf(this)"><span>Как происходит оплата клиентами?</span><div class="farr"><svg viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div><div class="fa"><p>Клиент нажимает «Оплатить» прямо в мини-приложении — картой через ЮKassa, Robokassa или Telegram Stars. Деньги идут на ваш счёт.</p></div></div>
+      <div class="fitem rv"><div class="fq" onclick="tf(this)"><span>Что если мне нужно что-то нестандартное?</span><div class="farr"><svg viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div><div class="fa"><p>Расскажите на созвоне — скорее всего, я уже делал что-то похожее. Пакеты покрывают 80% задач, но если нужна кастомная логика — соберу под вас.</p></div></div>
+      <div class="fitem rv"><div class="fq" onclick="tf(this)"><span>Есть поддержка после запуска?</span><div class="farr"><svg viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div><div class="fa"><p>Обязательно. После запуска провожу обучение, остаюсь на связи. Если что-то сломается — починю. Нужна доработка через полгода — сделаю. Я не исчезаю после сдачи проекта.</p></div></div>
     </div>
   </div>
 </section>
 
-<!-- FINAL CTA -->
-<section class="cta-final" id="contact">
-  <div class="orb-canvas">
-    <div class="orb orb-1" style="opacity:0.25"></div>
-    <div class="orb orb-2" style="opacity:0.2"></div>
-  </div>
+<!-- CTA -->
+<section class="ctaf" id="contact">
+  <div class="hero-bg"><div class="hero-orb hero-orb-1" style="opacity:.5"></div><div class="hero-orb hero-orb-2" style="opacity:.3"></div></div>
   <div class="container">
-    <h2 class="reveal-blur">Расскажите про свой бизнес — покажу, что можно сделать</h2>
-    <p class="reveal">Один созвон на 30 минут. На следующий день — план с модулями и стоимостью. Без обязательств.</p>
-    <div class="cta-final-buttons reveal">
-      <a href="tel:+79214667744" class="btn-primary btn-magnetic">
-        Позвонить
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-      </a>
-      <a href="mailto:egorgumenyuk@yandex.ru" class="btn-secondary">
-        Написать на почту
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-      </a>
+    <h2 class="rv-blur">Расскажите про свой бизнес — покажу, что можно сделать</h2>
+    <p class="rv">Один созвон на 30 минут. На следующий день — план с модулями и стоимостью. Без обязательств.</p>
+    <div class="ctab rv">
+      <a href="tel:+79214667744" class="btn-p" id="ctaBtn">Позвонить <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.08.63.24 1.24.46 1.85a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.6.22 1.22.38 1.85.46A2 2 0 0 1 22 16.92z"/></svg></a>
+      <a href="mailto:egorgumenyuk@yandex.ru" class="btn-s">Написать на почту <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></a>
     </div>
-    <div class="cta-contacts reveal">
-      <a href="tel:+79214667744" class="cta-contact">
-        <div class="cta-contact-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
-        <span>+7 (921) 466-77-44</span>
-      </a>
-      <a href="mailto:egorgumenyuk@yandex.ru" class="cta-contact">
-        <div class="cta-contact-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
-        <span>egorgumenyuk@yandex.ru</span>
-      </a>
-      <div class="cta-contact">
-        <div class="cta-contact-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
-        <span>г. Петрозаводск</span>
-      </div>
+    <div class="ctac rv">
+      <a href="tel:+79214667744" class="ctaci"><div class="ctaicon"><svg viewBox="0 0 24 24" fill="none" stroke="#facc15" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.08.63.24 1.24.46 1.85a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.6.22 1.22.38 1.85.46A2 2 0 0 1 22 16.92z"/></svg></div><span>+7 (921) 466-77-44</span></a>
+      <a href="mailto:egorgumenyuk@yandex.ru" class="ctaci"><div class="ctaicon"><svg viewBox="0 0 24 24" fill="none" stroke="#facc15" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div><span>egorgumenyuk@yandex.ru</span></a>
     </div>
   </div>
 </section>
 
-<!-- FOOTER -->
-<footer class="footer">
-  <div class="container">
-    <div class="footer-inner">
-      <div class="footer-copy">&copy; 2025 Егор Гуменюк. Разработка мини-приложений.</div>
-      <div class="footer-links">
-        <a href="tel:+79214667744">+7 (921) 466-77-44</a>
-        <a href="mailto:egorgumenyuk@yandex.ru">egorgumenyuk@yandex.ru</a>
-      </div>
-    </div>
-  </div>
-</footer>
+<footer class="footer"><div class="container"><div class="footer-in"><div class="footer-c">&copy; 2025 Егор Гуменюк. Разработка мини-приложений.</div><div class="footer-l"><a href="tel:+79214667744">+7 (921) 466-77-44</a><a href="mailto:egorgumenyuk@yandex.ru">egorgumenyuk@yandex.ru</a></div></div></div></footer>
 
-<!-- MOBILE CTA BAR -->
-<div class="mobile-cta-bar">
-  <a href="tel:+79214667744" class="btn-primary">
-    Позвонить
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-  </a>
-</div>
+<div class="mcta"><a href="tel:+79214667744" class="btn-p">Позвонить <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.08.63.24 1.24.46 1.85a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.6.22 1.22.38 1.85.46A2 2 0 0 1 22 16.92z"/></svg></a></div>
 
 <script>
-// Scroll reveal observer
-const revealObserver = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) entry.target.classList.add('visible');
-  });
-}, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+// Reveal
+const ro = new IntersectionObserver(e => e.forEach(x => { if(x.isIntersecting) x.target.classList.add('v') }), { threshold: .06, rootMargin: '0px 0px -30px 0px' });
+document.querySelectorAll('.rv,.rv-blur,.rv-scale,.rv-left,.rv-right').forEach(e => ro.observe(e));
 
-document.querySelectorAll('.reveal, .reveal-scale, .reveal-blur').forEach(el => revealObserver.observe(el));
-
-// Nav scroll effect
+// Nav
 const nav = document.getElementById('nav');
-window.addEventListener('scroll', () => {
-  nav.classList.toggle('scrolled', window.scrollY > 40);
-}, { passive: true });
+window.addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 40), { passive: true });
 
 // Mobile menu
-const burger = document.getElementById('burger');
-const mobileMenu = document.getElementById('mobileMenu');
-burger.addEventListener('click', () => {
-  burger.classList.toggle('active');
-  mobileMenu.classList.toggle('open');
-  document.body.style.overflow = mobileMenu.classList.contains('open') ? 'hidden' : '';
-});
-function closeMobileMenu() {
-  burger.classList.remove('active');
-  mobileMenu.classList.remove('open');
-  document.body.style.overflow = '';
-}
+const bg = document.getElementById('burger'), mm = document.getElementById('mob');
+bg.addEventListener('click', () => { bg.classList.toggle('on'); mm.classList.toggle('open'); document.body.style.overflow = mm.classList.contains('open') ? 'hidden' : ''; });
+function cmm() { bg.classList.remove('on'); mm.classList.remove('open'); document.body.style.overflow = ''; }
 
-// FAQ accordion
-function toggleFaq(el) {
-  const item = el.closest('.faq-item');
-  const wasOpen = item.classList.contains('open');
-  document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
-  if (!wasOpen) item.classList.add('open');
-}
+// FAQ
+function tf(el) { const i = el.closest('.fitem'), o = i.classList.contains('open'); document.querySelectorAll('.fitem.open').forEach(x => x.classList.remove('open')); if(!o) i.classList.add('open'); }
 
-// Smooth scroll for anchor links
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-  anchor.addEventListener('click', function(e) {
-    const target = document.querySelector(this.getAttribute('href'));
-    if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
-  });
+// Smooth scroll
+document.querySelectorAll('a[href^="#"]').forEach(a => a.addEventListener('click', function(e) { const t = document.querySelector(this.getAttribute('href')); if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth',block:'start'})} }));
+
+// Mouse glow
+document.querySelectorAll('.glow').forEach(c => c.addEventListener('mousemove', e => { const r = c.getBoundingClientRect(); c.style.setProperty('--mx',(e.clientX-r.left)+'px'); c.style.setProperty('--my',(e.clientY-r.top)+'px'); }));
+
+// Magnetic buttons
+document.querySelectorAll('#heroBtn,#ctaBtn').forEach(b => {
+  b.addEventListener('mousemove', e => { const r=b.getBoundingClientRect(); b.style.transform=`translateY(-3px) translate(${(e.clientX-r.left-r.width/2)*.2}px,${(e.clientY-r.top-r.height/2)*.2}px)`; });
+  b.addEventListener('mouseleave', () => b.style.transform='');
 });
 
-// Mouse glow on cards
-document.querySelectorAll('.glow-card').forEach(card => {
-  card.addEventListener('mousemove', (e) => {
-    const rect = card.getBoundingClientRect();
-    card.style.setProperty('--mouse-x', (e.clientX - rect.left) + 'px');
-    card.style.setProperty('--mouse-y', (e.clientY - rect.top) + 'px');
-  });
+// Counter
+const co = new IntersectionObserver(e => e.forEach(x => {
+  if(!x.isIntersecting) return;
+  const el=x.target, t=+el.dataset.count, s=el.dataset.suffix||'';
+  if(!t) return;
+  let c=0; const dur=1200, st=Math.max(1,Math.ceil(t/(dur/16)));
+  const tm=setInterval(()=>{ c+=st; if(c>=t){c=t;clearInterval(tm)} el.textContent=c+s; },16);
+  co.unobserve(el);
+}), { threshold: .5 });
+document.querySelectorAll('[data-count]').forEach(e => co.observe(e));
+
+// Parallax orbs on mouse
+document.addEventListener('mousemove', e => {
+  const x=(e.clientX/innerWidth-.5)*2, y=(e.clientY/innerHeight-.5)*2;
+  document.querySelectorAll('.hero-orb-1').forEach(o => o.style.transform=`translate(${x*40}px,${y*25}px)`);
+  document.querySelectorAll('.hero-orb-2').forEach(o => o.style.transform=`translate(${x*-25}px,${y*20}px)`);
 });
 
-// Magnetic button effect
-document.querySelectorAll('.btn-magnetic').forEach(btn => {
-  btn.addEventListener('mousemove', (e) => {
-    const rect = btn.getBoundingClientRect();
-    const x = e.clientX - rect.left - rect.width / 2;
-    const y = e.clientY - rect.top - rect.height / 2;
-    btn.style.transform = `translateY(-2px) translate(${x * 0.15}px, ${y * 0.15}px)`;
+// Tilt cards on hover
+document.querySelectorAll('.pcard,.scard,.plcard,.prstep,.ccard,.prcard').forEach(card => {
+  card.addEventListener('mousemove', e => {
+    const r=card.getBoundingClientRect(), x=(e.clientX-r.left)/r.width-.5, y=(e.clientY-r.top)/r.height-.5;
+    card.style.transform=`translateY(-8px) perspective(600px) rotateY(${x*8}deg) rotateX(${-y*8}deg)`;
   });
-  btn.addEventListener('mouseleave', () => {
-    btn.style.transform = '';
-  });
-});
-
-// Counter animation for stat numbers
-const counterObserver = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      const el = entry.target;
-      const target = parseInt(el.dataset.count);
-      if (!target) return;
-      let current = 0;
-      const duration = 1500;
-      const step = Math.ceil(target / (duration / 16));
-      const suffix = el.textContent === '0' ? '' : '+';
-      const timer = setInterval(() => {
-        current += step;
-        if (current >= target) { current = target; clearInterval(timer); }
-        el.textContent = current + (target <= 3 ? '+' : '+');
-      }, 16);
-      counterObserver.unobserve(el);
-    }
-  });
-}, { threshold: 0.5 });
-
-document.querySelectorAll('[data-count]').forEach(el => counterObserver.observe(el));
-
-// Parallax orbs on mouse move
-document.addEventListener('mousemove', (e) => {
-  const x = (e.clientX / window.innerWidth - 0.5) * 2;
-  const y = (e.clientY / window.innerHeight - 0.5) * 2;
-  document.querySelectorAll('.orb-1').forEach(o => o.style.transform = `translate(${x * 30}px, ${y * 20}px) scale(1)`);
-  document.querySelectorAll('.orb-2').forEach(o => o.style.transform = `translate(${x * -20}px, ${y * 15}px) scale(1)`);
-  document.querySelectorAll('.orb-3').forEach(o => o.style.transform = `translate(${x * 15}px, ${y * -25}px) scale(1)`);
+  card.addEventListener('mouseleave', () => { card.style.transform=''; });
 });
 </script>
-
 </body>
 </html>
